@@ -9,9 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#FFCA0E",    // Kuning 
+        primary: "#FFCA0E",    // Kuning
         secondary: "#85ECA9",  // Hijau mint
         tertiary: "#98CAD5",   // Biru muda
+        primary_bg: "#F8E6C2", //Krem
       },
       fontFamily: {
         beachday: ["var(--font-beachday)"],
