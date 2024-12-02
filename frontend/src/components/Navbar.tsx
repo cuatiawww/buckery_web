@@ -51,14 +51,14 @@ const Navbar = () => {
           </Link>
 
           <Link 
-            href="/promo"
+            href="/tentangKami"
             className={`relative font-semibold transition-colors group ${
-              isActive('/promo') ? 'text-primary' : 'text-gray-800 hover:text-primary'
+              isActive('/tentangKami') ? 'text-primary' : 'text-gray-800 hover:text-primary'
             }`}
           >
-            <span>PROMO</span>
+            <span>Tentang Kami</span>
             <span className={`absolute -bottom-1 left-0 w-full h-0.5 bg-primary transform origin-left transition-transform duration-300 ${
-              isActive('/promo') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+              isActive('/tentangKami') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
             }`} />
           </Link>
 

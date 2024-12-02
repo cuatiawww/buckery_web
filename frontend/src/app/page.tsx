@@ -1,3 +1,4 @@
+// app/page.tsx
 import React from 'react';
 import AboutBuckery from '@/components/AboutBuckery';
 import Footer from '@/components/Footer';
@@ -6,7 +7,7 @@ import TestimonialsSection from '@/components/TestimonyCard';
 import WordingBuckery from '@/components/WordingBuckery';
 import HeroSection from '@/components/HeroSection';
 
-export default function LandingPage() {
+export default function Home() {
   return (
     <div className="relative">
       <HeroSection />
