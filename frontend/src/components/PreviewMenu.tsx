@@ -74,10 +74,11 @@ const PreviewMenu = () => {
   ];
 
   return (
-    <div className="container mx-auto px-16">
-      {/* Category Buttons */}
-      <h2 className="text-6xl font-black text-center mb-16">KATEGORIZZZ</h2>
-      <div className="flex justify-center gap-8 mb-16">
+    <div className="container mx-auto mt-[-00px]"> 
+      {/* Title moved closer to AboutBuckery section */}
+      <h2 className="text-6xl font-black text-center mb-8">KATEGORIZZZ</h2>
+      
+      <div className="flex justify-center gap-8 mb-8">
         {categories.map((category) => (
           <button
             key={category.id}
