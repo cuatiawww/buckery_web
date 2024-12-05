@@ -4,22 +4,21 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
-import { useCart } from '@/context/CartContext'; // Import hook untuk cart
+import { useCart } from '@/context/CartContext';
 
 interface CartItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  image: string;
-}
+    id: number;
+    name: string;
+    quantity: number;
+    price: number;
+    image: string;
+  }
 
 const deliveryHours = {
   weekday: "Monday - Friday: 08.00 AM - 20.00 PM"
 };
 
 export default function CartPage() {
-  // Gunakan useCart hook untuk mendapatkan state dan fungsi cart
   const { items, updateQuantity, removeItem } = useCart();
 
   const calculateTotal = () => {
@@ -27,7 +26,7 @@ export default function CartPage() {
   };
 
   const CartHeader = () => (
-    <div className="bg-primary pt-24 pb-16 relative">
+    <div className="bg-yellow-400 pt-24 pb-16 relative">
       <div className="container mx-auto px-4 flex justify-between items-center mb-8">
         <Link href="/menu" className="flex items-center text-black">
           <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
@@ -38,10 +37,7 @@ export default function CartPage() {
           <h1 className="text-4xl font-bold text-black">KERANJANG</h1>
         </div>
         
-        <Link href="/checkout" className="flex items-center text-black">
-          <span className="text-xl font-bold">LANJUTKAN</span>
-          <Image src="/direct-right.svg" alt="Next" width={60} height={40} priority />
-        </Link>
+        <div className="w-[144px]" />
       </div>
 
       <WaveBorder />
@@ -77,21 +73,42 @@ export default function CartPage() {
   );
 
   const CartItems = () => (
-    <div className="bg-white rounded-xl border-4 border-black overflow-hidden">
-      <div className="grid grid-cols-3 bg-blue-200 p-4 font-bold text-xl">
-        <div>PRODUK</div>
-        <div className="text-center">JUMLAH</div>
-        <div className="text-right">SUB TOTAL</div>
+    <div className="space-y-8">
+      <div className="bg-white rounded-xl border-4 border-black overflow-hidden">
+        <div className="grid grid-cols-3 bg-blue-200 p-4 font-bold text-xl">
+          <div>PRODUK</div>
+          <div className="text-center">JUMLAH</div>
+          <div className="text-right">SUB TOTAL</div>
+        </div>
+
+        {items.length > 0 ? (
+          items.map((item) => (
+            <CartItemRow key={item.id} item={item} />
+          ))
+        ) : (
+          <div className="p-8 text-center text-gray-500">
+            Keranjang belanja Anda masih kosong
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 bg-blue-200 p-4 font-bold text-xl">
+          <div className="col-span-2">TOTAL</div>
+          <div className="text-right">Rp {calculateTotal().toLocaleString()}</div>
+        </div>
       </div>
 
-      {items.map((item) => (
-        <CartItemRow key={item.id} item={item} />
-      ))}
-
-      <div className="grid grid-cols-3 bg-blue-200 p-4 font-bold text-xl">
-        <div className="col-span-2">TOTAL</div>
-        <div className="text-right">Rp {calculateTotal().toLocaleString()}</div>
-      </div>
+      {/* Checkout Button */}
+      {items.length > 0 && (
+        <div className="flex justify-end">
+          <Link 
+            href="/datapemesanan" 
+            className="flex items-center space-x-2 bg-yellow-400 text-black font-bold py-4 px-8 rounded-xl border-4 border-black hover:bg-yellow-500 transition-colors"
+          >
+            <span className="text-xl">CHECKOUT</span>
+            <Image src="/direct-right.svg" alt="Next" width={40} height={40} priority />
+          </Link>
+        </div>
+      )}
     </div>
   );
 
@@ -138,7 +155,7 @@ export default function CartPage() {
   );
 
   return (
-    <main className="min-h-screen bg-primary">
+    <main className="min-h-screen bg-yellow-400">
       <CartHeader />
       
       <div className="bg-primary_bg">

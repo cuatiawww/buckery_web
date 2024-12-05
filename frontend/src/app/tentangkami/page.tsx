@@ -1,20 +1,76 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Image from 'next/image';
 
 const TentangKami = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const timelineEvents = [
+    {
+      year: '2020',
+      title: 'Awal Mula',
+      description: 'Buckery lahir dari dapur rumah kecil kami. Roti pertama kami hanya dijual di koperasi tempat kerja suami dan kepada teman-teman dekat.',
+      image: '/buckery-illustration.jpg'
+    },
+    {
+      year: '2021',
+      title: 'Pertumbuhan',
+      description: 'Dengan penuh cinta, setiap roti yang kami buat membawa harapan. Tak disangka, rasa dan cerita di balik Buckery mulai menarik perhatian.',
+      image: '/buckery-illustration-2.jpg'
+    },
+    {
+      year: '2022',
+      title: 'Pengembangan',
+      description: 'Kini, Buckery telah berkembang, menjual roti secara online, lengkap dengan varian donat, jajanan pasar, hingga melayani ribuan pesanan.',
+      image: '/buckery-illustration.jpg'
+    },
+    {
+      year: '2023',
+      title: 'Inovasi',
+      description: 'Buckery terus berinovasi dengan menciptakan berbagai varian roti baru dan mengembangkan sistem delivery yang lebih baik.',
+      image: '/buckery-illustration-2.jpg'
+    }
+  ];
+
+  const founders = [
+    { 
+      name: 'ELFINA SEPLANI', 
+      role: 'Founder & CEO',
+      quote: '"Setiap roti yang kami buat adalah cerita yang kami bagikan."',
+      image: '/team-member-placeholder.jpg'
+    },
+    { 
+      name: 'SANTA KATALYA', 
+      role: 'Co-Founder & Head Baker',
+      quote: '"Kesempurnaan dalam setiap gigitan adalah prioritas kami."',
+      image: '/team-member-placeholder.jpg'
+    }
+  ];
+
   const teamMembers = [
-    { name: 'ELFINA SEPLANI', role: 'CEO Buckery' },
-    { name: 'SANTA KATALYA', role: 'CEO Buckery' },
-    { name: 'DAVID KRISTIAN', role: 'CEO Buckery' },
-    { name: 'RICKY HANSEN', role: 'CEO Buckery' }
+    { 
+      name: 'DAVID KRISTIAN', 
+      role: 'Chief Marketing Officer',
+      image: '/team-member-placeholder.jpg'
+    },
+    { 
+      name: 'RICKY HANSEN', 
+      role: 'Operations Manager',
+      image: '/team-member-placeholder.jpg'
+    }
   ];
 
   return (
     <main className="min-h-screen bg-yellow-400">
       <Navbar />
+      
       {/* Header Section */}
       <div className="bg-yellow-400 pt-32 pb-16 relative">
         {/* Title */}
@@ -39,63 +95,123 @@ const TentangKami = () => {
         </div>
       </div>
 
-      {/* Content Section with Cream Background */}
+      {/* Content Section */}
       <div className="bg-primary_bg">
-        <div className="container mx-auto px-4 py-16">
-          {/* Story Section */}
-          <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
-            <div className="md:w-1/2">
-              <img
-                src="/buckery-illustration.jpg"
-                alt="Buckery Story"
-                className="rounded-lg w-full h-auto border-4 border-black"
-              />
-            </div>
-            <div className="md:w-1/2">
-              <p className="text-lg mb-6">
-                Buckery lahir dari cerita sederhana, berawal dari dapur rumah kecil kami. Roti pertama kami hanya dijual di koperasi tempat kerja suami dan kepada teman-teman dekat. Dengan penuh cinta, setiap roti yang kami buat membawa harapan, agar hasilnya tak hanya lezat, tetapi juga berarti. Tak disangka, rasa dan cerita di balik Buckery mulai menarik perhatian.
-              </p>
+        <div className="container mx-auto px-4 md:px-8 lg:px-16 py-16">
+          {/* Timeline Section */}
+          <div className="mb-32">
+            <h2 className="text-4xl md:text-6xl font-black text-center mb-16 animate-fade-in">
+              PERJALANAN KAMI
+            </h2>
+            <div className="space-y-24">
+              {timelineEvents.map((event, index) => (
+                <div 
+                  key={index}
+                  className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-8 md:gap-16 opacity-0 transition-all duration-1000 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'translate-y-20'
+                  }`}
+                  style={{ transitionDelay: `${index * 200}ms` }}
+                >
+                  <div className="md:w-1/2">
+                    <div className="relative rounded-3xl overflow-hidden border-4 border-black shadow-xl hover:scale-[1.02] transition-transform duration-300">
+                      <Image
+                        src={event.image}
+                        alt={event.title}
+                        width={600}
+                        height={400}
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:w-1/2">
+                    <div className="bg-primary p-8 rounded-3xl border-4 border-black shadow-lg relative">
+                      <div className="absolute -top-6 left-8 bg-secondary px-6 py-2 rounded-full border-4 border-black font-black text-xl">
+                        {event.year}
+                      </div>
+                      <h3 className="text-2xl font-black mb-4 mt-2">{event.title}</h3>
+                      <p className="text-xl font-ChickenSoup leading-relaxed">
+                        {event.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Growth Section */}
-          <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
-            <div className="md:w-1/2 order-2 md:order-1">
-              <p className="text-lg">
-                Kini, Buckery telah berkembang, menjual roti secara online, lengkap dengan varian donat, jajanan pasar, hingga melayani ribuan pesanan untuk berbagai acara. Setiap pesanan adalah kesempatan bagi kami untuk berbagi cerita dan kehangatan. Buckery berdiri bukan hanya karena adonan yang sempurna, tetapi juga karena semangat dan dukungan luar biasa dari pelanggan kami. Terima kasih telah menjadi bagian dari perjalanan Buckery—dari dapur kecil hingga setiap senyuman yang hadir di meja makan Anda.
-              </p>
-            </div>
-            <div className="md:w-1/2 order-1 md:order-2">
-              <img
-                src="/buckery-illustration-2.jpg"
-                alt="Buckery Growth"
-                className="rounded-lg w-full h-auto border-4 border-black"
-              />
+          {/* Founders Section */}
+          <div className="mb-32">
+            <h2 className="text-4xl md:text-6xl font-black text-center mb-16">
+              PENDIRI BUCKERY
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              {founders.map((founder, index) => (
+                <div 
+                  key={index}
+                  className={`transform transition-all duration-1000 delay-${index * 200} ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+                  }`}
+                >
+                  <div className="bg-secondary p-8 rounded-3xl border-4 border-black shadow-lg hover:scale-[1.02] transition-transform duration-300">
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                      <div className="w-40 h-40 rounded-2xl overflow-hidden border-4 border-black flex-shrink-0">
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={founder.image}
+                            alt={founder.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <h3 className="text-2xl font-black mb-2">{founder.name}</h3>
+                        <p className="text-lg font-ChickenSoup mb-4">{founder.role}</p>
+                        <p className="text-xl font-ChickenSoup italic">{founder.quote}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Team Section */}
-          <div className="mt-16">
-            <h2 className="text-3xl font-bold text-center mb-12">DIBALIK BUCKERY</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="mt-24">
+            <h2 className="text-4xl md:text-6xl font-black text-center mb-16">
+              TIM KAMI
+            </h2>
+            <div className="grid grid-cols-2 gap-8">
               {teamMembers.map((member, index) => (
-                <div key={index} className="flex flex-col items-center">
-                  <div className="w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-black">
-                    <img
-                      src="/team-member-placeholder.jpg"
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
+                <div 
+                  key={index}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 200}ms` }}
+                >
+                  <div className="bg-primary p-6 rounded-3xl border-4 border-black shadow-lg hover:scale-105 transition-transform duration-300">
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                      <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-black">
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={member.image}
+                            alt={member.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <h3 className="text-xl font-black mb-2">{member.name}</h3>
+                        <p className="text-lg font-ChickenSoup">{member.role}</p>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-center">{member.name}</h3>
-                  <p className="text-sm text-gray-600 text-center">{member.role}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
-      {/* Footer */}
       <Footer />
     </main>
   );
