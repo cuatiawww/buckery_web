@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { registerUser } from '@/services/authService';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface FormData {
   namaLengkap: string;
@@ -16,6 +17,7 @@ interface FormData {
 
 const RegisterPage = () => {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     namaLengkap: '',
     username: '',
@@ -29,6 +31,9 @@ const RegisterPage = () => {
       ...prev,
       [name]: value
     }));
+  };
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -81,7 +86,7 @@ const RegisterPage = () => {
                 name="namaLengkap"
                 value={formData.namaLengkap}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-gray-300 focus:outline-none focus:border-primary"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary"
                 required
               />
             </div>
@@ -95,7 +100,7 @@ const RegisterPage = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-gray-300 focus:outline-none focus:border-primary"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary"
                 required
               />
             </div>
@@ -109,28 +114,42 @@ const RegisterPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-gray-300 focus:outline-none focus:border-primary"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold uppercase mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-gray-300 focus:outline-none focus:border-primary"
-                required
-              />
-            </div>
+  <label className="block text-sm font-bold uppercase mb-2">
+    Password
+  </label>
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      name="password"
+      value={formData.password}
+      onChange={handleChange}
+      className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary text-black tracking-widest"
+      autoComplete="new-password"
+      required
+    />
+    <button
+      type="button"
+      onClick={togglePasswordVisibility}
+      className="absolute right-3 top-1/2 transform -translate-y-1/2"
+    >
+      {showPassword ? (
+        <EyeOff className="h-5 w-5 text-gray-500" />
+      ) : (
+        <Eye className="h-5 w-5 text-gray-500" />
+      )}
+    </button>
+  </div>
+</div>
 
             <button
               type="submit"
-              className="w-full p-3 bg-[#1E293B] text-white rounded-lg font-bold uppercase hover:bg-gray-800 transition-colors"
+              className="w-full p-3 bg-tertiary text-black rounded-lg font-bold uppercase border-4 border-black hover:bg-secondary  transition-colors"
             >
               Daftar
             </button>
