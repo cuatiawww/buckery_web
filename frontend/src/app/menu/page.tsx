@@ -1,25 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { menuService, Product, Category } from '@/services/api';
 
-interface MenuItem {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-}
-
-interface MenuCategoryProps {
-  title: string;
-  items: MenuItem[];
-}
-
-// Memindahkan MenuItem component ke luar sebagai komponen terpisah
-const MenuItem = ({ item }: { item: MenuItem }) => {
+const MenuItem = ({ item }: { item: Product }) => {
   const { addItem } = useCart();
   
   const handleAddToCart = () => {
@@ -28,15 +16,20 @@ const MenuItem = ({ item }: { item: MenuItem }) => {
       name: item.name,
       price: item.price,
       quantity: 1,
-      image: item.image
+      image: item.image || '/roti.png'
     });
+  };
+  // Fungsi helper untuk menentukan src image
+  const getImageSrc = (imageUrl: string | null | undefined): string => {
+    if (!imageUrl) return '/roti.png';
+    return imageUrl.startsWith('http') ? imageUrl : '/roti.png';
   };
 
   return (
     <div className="bg-primary rounded-3xl p-4 flex flex-col items-center shadow-lg border-2 border-black">
       <div className="w-full aspect-square relative mb-2 rounded-2xl overflow-hidden">
         <Image
-          src={item.image}
+          src={getImageSrc(item.image)}
           alt={item.name}
           layout="fill"
           objectFit="cover"
@@ -55,35 +48,59 @@ const MenuItem = ({ item }: { item: MenuItem }) => {
   );
 };
 
-const MenuPage = () => {
-  const menuItem: MenuItem = {
-    id: 1,
-    name: "Roti Pisang Coklat",
-    price: 10000,
-    image: "/roti.png"
-  };
+interface MenuCategoryProps {
+  title: string;
+  items: Product[];
+}
 
-  const createMenuItems = (count: number, startId: number): MenuItem[] => {
-    return Array(count).fill(null).map((_, index) => ({
-      ...menuItem,
-      id: startId + index
-    }));
-  };
-
-  const MenuCategory: React.FC<MenuCategoryProps> = ({ title, items }) => (
-    <div className="relative">
-      <h2 className="text-3xl font-bold text-black text-center mb-6">{title}</h2>
-      <div className="overflow-x-auto pb-4">
-        <div className="flex space-x-6 px-4" style={{ minWidth: 'min-content' }}>
-          {items.map((item) => (
-            <div key={item.id} className="flex-none w-64">
-              <MenuItem item={item} />
-            </div>
-          ))}
-        </div>
+const MenuCategory: React.FC<MenuCategoryProps> = ({ title, items }) => (
+  <div className="relative">
+    <h2 className="text-3xl font-bold text-black text-center mb-6">{title}</h2>
+    <div className="overflow-x-auto pb-4">
+      <div className="flex space-x-6 px-4" style={{ minWidth: 'min-content' }}>
+        {items.map((item) => (
+          <div key={item.id} className="flex-none w-64">
+            <MenuItem item={item} />
+          </div>
+        ))}
       </div>
     </div>
-  );
+  </div>
+);
+
+const MenuPage = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesData, productsData] = await Promise.all([
+          menuService.getAllCategories(),
+          menuService.getAllProducts()
+        ]);
+        setCategories(categoriesData);
+        setProducts(productsData);
+        setLoading(false);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        setError('Failed to load menu data');
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="min-h-screen">
@@ -127,11 +144,18 @@ const MenuPage = () => {
       {/* Content Section */}
       <div className="bg-primary_bg py-12">
         <div className="container mx-auto">
-          <MenuCategory title="SWEET" items={createMenuItems(5, 1)} />
-          <div className="h-24" />
-          <MenuCategory title="SAVORY" items={createMenuItems(5, 6)} /> {/* Updated startId */}
-          <div className="h-24" />
-          <MenuCategory title="LAINNYA" items={createMenuItems(5, 11)} /> {/* Updated startId */}
+          {categories.map(category => {
+            const categoryProducts = products.filter(product => product.category === category.id);
+            return (
+              <React.Fragment key={category.id}>
+                <MenuCategory 
+                  title={category.name.toUpperCase()} 
+                  items={categoryProducts} 
+                />
+                <div className="h-24" />
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 

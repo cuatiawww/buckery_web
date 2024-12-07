@@ -83,7 +83,6 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* New Wave Section with separate mobile and desktop versions */}
       <div className="absolute w-full -bottom-[30] left-0 right-0 z-0">
         {/* Mobile Wave (hidden on desktop) */}
         <div className="md:hidden">

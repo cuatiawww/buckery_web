@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import Footer from '@/components/Footer';
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface OrderFormData {
   name: string;
@@ -71,28 +73,40 @@ const handleSubmit = (e: React.FormEvent) => {
       <Navbar />
       
       {/* Header with Navigation */}
-      <div className="container mx-auto px-4 pt-32 pb-8">
-        <div className="flex items-center justify-between mb-8">
-          <button 
-            onClick={() => router.back()}
-            className="flex items-center space-x-2 text-xl font-bold"
-          >
-            <ArrowLeft className="w-8 h-8" />
-            <span>KEMBALI</span>
-          </button>
-          <h1 className="text-4xl font-bold">DATA PEMESANAN</h1>
-          <div className="w-32" />
+      <div className="bg-primary pt-24 pb-16 relative">
+        <div className="container mx-auto px-4 flex justify-between items-center mb-8">
+          <Link href="/keranjang" className="flex items-center text-black">
+            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
+            <span className="text-xl font-bold">KEMBALI</span>
+          </Link>
+          
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-black">Data Pemesanan</h1>
+          </div>
+          
+          <Link href="/keranjang" className="flex items-center text-black">
+            <span className="text-xl font-bold">LANJUTKAN</span>
+            <Image src="/direct-right.svg" alt="Next" width={60} height={40} priority />
+          </Link>
         </div>
-      </div>
 
-      {/* Wave Border */}
-      <div className="relative">
-        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-          <path
-            fill="#F8E6C2"
-            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-          />
-        </svg>
+        {/* Wave Border */}
+        <div className="absolute bottom-50 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+            <path
+              fill="#000000"
+              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+            />
+          </svg>
+        </div>
+        <div className="absolute -bottom-1 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+            <path
+              fill="#F8E6C2"
+              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+            />
+          </svg>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -227,7 +241,7 @@ const handleSubmit = (e: React.FormEvent) => {
                   disabled={!formData.deliveryMethod}
                   className={`flex items-center space-x-2 px-8 py-4 rounded-xl border-4 border-black font-bold text-xl transition-colors
                     ${formData.deliveryMethod ? 
-                      'bg-yellow-400 hover:bg-yellow-500 text-black' : 
+                      'bg-tertiary hover:bg-primary text-black' : 
                       'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
                 >
                   <span>LANJUT KE PEMBAYARAN</span>

@@ -1,11 +1,14 @@
 "use client";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, User, LogOut, Menu, X } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/services/api';
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -13,42 +16,14 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { itemCount } = useCart();
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('token') !== null;
-    }
-    return false;
-  });
-  const [username, setUsername] = useState('');
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      setIsAuthenticated(!!token);
-      if (token) {
-        setUsername(localStorage.getItem('username') || '');
-      }
-    };
-
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
+  const { isAuthenticated, username, logout } = useAuth();
 
   const isActive = (path: string) => pathname === path;
 
   const handleLogout = async () => {
     try {
-      await fetch('http://127.0.0.1:8000/api/logout/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${localStorage.getItem('token')}`
-        }
-      });
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      setIsAuthenticated(false);
-      setUsername('');
+      await authService.logout();
+      logout(); // Use the auth context's logout function
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);

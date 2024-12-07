@@ -4,68 +4,68 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
+import { aboutService, TeamMember, TimelineEvent } from '@/services/api';
 
 const TentangKami = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [founders, setFounders] = useState<TeamMember[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isVisible, setIsVisible] = useState(true); // Changed to true by default
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsVisible(true);
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Fetch data sequentially to better handle errors
+        const timelineData = await aboutService.getTimelineEvents();
+        console.log('Timeline Data:', timelineData);
+        // Jika data bukan array, akan dikonversi menjadi array kosong
+        setTimelineEvents(Array.isArray(timelineData) ? timelineData : []); 
+
+        const foundersData = await aboutService.getFounders();
+        console.log('Founders Data:', foundersData);
+        setFounders(Array.isArray(foundersData) ? foundersData : []);
+
+        const teamData = await aboutService.getTeamMembers();
+        console.log('Team Data:', teamData);
+        setTeamMembers(Array.isArray(teamData) ? teamData : []);
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const timelineEvents = [
-    {
-      year: '2020',
-      title: 'Awal Mula',
-      description: 'Buckery lahir dari dapur rumah kecil kami. Roti pertama kami hanya dijual di koperasi tempat kerja suami dan kepada teman-teman dekat.',
-      image: '/buckery-illustration.jpg'
-    },
-    {
-      year: '2021',
-      title: 'Pertumbuhan',
-      description: 'Dengan penuh cinta, setiap roti yang kami buat membawa harapan. Tak disangka, rasa dan cerita di balik Buckery mulai menarik perhatian.',
-      image: '/buckery-illustration-2.jpg'
-    },
-    {
-      year: '2022',
-      title: 'Pengembangan',
-      description: 'Kini, Buckery telah berkembang, menjual roti secara online, lengkap dengan varian donat, jajanan pasar, hingga melayani ribuan pesanan.',
-      image: '/buckery-illustration.jpg'
-    },
-    {
-      year: '2023',
-      title: 'Inovasi',
-      description: 'Buckery terus berinovasi dengan menciptakan berbagai varian roti baru dan mengembangkan sistem delivery yang lebih baik.',
-      image: '/buckery-illustration-2.jpg'
-    }
-  ];
+  // Show Indcator loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
+        <div className="text-2xl font-bold">Loading...</div>
+      </div>
+    );
+  }
 
-  const founders = [
-    { 
-      name: 'ELFINA SEPLANI', 
-      role: 'Founder & CEO',
-      quote: '"Setiap roti yang kami buat adalah cerita yang kami bagikan."',
-      image: '/team-member-placeholder.jpg'
-    },
-    { 
-      name: 'SANTA KATALYA', 
-      role: 'Co-Founder & Head Baker',
-      quote: '"Kesempurnaan dalam setiap gigitan adalah prioritas kami."',
-      image: '/team-member-placeholder.jpg'
-    }
-  ];
-
-  const teamMembers = [
-    { 
-      name: 'DAVID KRISTIAN', 
-      role: 'Chief Marketing Officer',
-      image: '/team-member-placeholder.jpg'
-    },
-    { 
-      name: 'RICKY HANSEN', 
-      role: 'Operations Manager',
-      image: '/team-member-placeholder.jpg'
-    }
-  ];
+  // Show indicator error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
+        <div className="text-2xl font-bold text-red-600">{error}</div>
+      </div>
+    );
+  }
+  
+  //jika data gambar gagal/ tidak tersedia maka default
+  const DEFAULT_IMAGE = '/Pict2.jpg';
 
   return (
     <main className="min-h-screen bg-yellow-400">
@@ -115,7 +115,7 @@ const TentangKami = () => {
                   <div className="md:w-1/2">
                     <div className="relative rounded-3xl overflow-hidden border-4 border-black shadow-xl hover:scale-[1.02] transition-transform duration-300">
                       <Image
-                        src={event.image}
+                        src={event.image || DEFAULT_IMAGE}
                         alt={event.title}
                         width={600}
                         height={400}
@@ -157,7 +157,7 @@ const TentangKami = () => {
                       <div className="w-40 h-40 rounded-2xl overflow-hidden border-4 border-black flex-shrink-0">
                         <div className="relative w-full h-full">
                           <Image
-                            src={founder.image}
+                            src={founder.image || DEFAULT_IMAGE}
                             alt={founder.name}
                             fill
                             className="object-cover"
@@ -193,7 +193,7 @@ const TentangKami = () => {
                       <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-black">
                         <div className="relative w-full h-full">
                           <Image
-                            src={member.image}
+                            src={member.image || DEFAULT_IMAGE}
                             alt={member.name}
                             fill
                             className="object-cover"

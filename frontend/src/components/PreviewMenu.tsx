@@ -3,79 +3,12 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus, Minus } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { menuService, Product, Category } from '@/services/api';
 
-interface MenuItem {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-}
-
-interface CategoryContent {
-  description: string;
-  items: MenuItem[];
-}
-
-interface MenuCategories {
-  [key: string]: CategoryContent;
-}
-
-// Update menuCategories dengan ID yang unik untuk setiap item
-const menuCategories: MenuCategories = {
-  sweet: {
-    description: `"Manisnya lembut, bikin hati
-    auto Warm Vibes. Dari roti isi
-    coklat lumer sampe cream
-    legit - ini snack wajib pas
-    lagi me time atau butuh
-    mood booster!"`,
-    items: Array(6).fill(null).map((_, index) => ({
-      id: index + 1,
-      name: "Roti Pisang Coklat",
-      price: 10000,
-      image: "/roti.png"
-    }))
-  },
-  savory: {
-    description: `"Gurihnya bikin mind-blown!
-    Keju, daging, atau bumbu
-    spesial yang perfect
-    combo sama tekstur roti
-    lembut kita. Cocok buat lo
-    yang suka salty vibes dan no
-    drama snacks."`,
-    items: Array(7).fill(null).map((_, index) => ({
-      id: index + 7, // Start from 7 to avoid ID conflicts
-      name: "Roti Pisang Coklat",
-      price: 10000,
-      image: "/roti.png"
-    }))
-  },
-  lainnya: {
-    description: `"Lebih dari sekadar roti! Dari
-    dimsum juicy, kue ulang
-    tahun fancy, sampai bolu
-    lembut buat segala momen.
-    Ini dia kategori buat lo yang
-    pengen snack time beda,
-    tapi tetep next level!"`,
-    items: Array(4).fill(null).map((_, index) => ({
-      id: index + 14, // Start from 14 to avoid ID conflicts
-      name: "Roti Pisang Coklat",
-      price: 10000,
-      image: "/roti.png"
-    }))
-  }
-};
-
-type CategoryId = keyof typeof menuCategories;
-
-// Separate PreviewMenuItem component
-const PreviewMenuItem = ({ item }: { item: MenuItem }) => {
+const PreviewMenuItem = ({ item }: { item: Product }) => {
   const { addItem, updateQuantity, items } = useCart();
   const [quantity, setQuantity] = useState(0);
   
-  // Check if item is in cart
   const cartItem = items.find(i => i.id === item.id);
   
   useEffect(() => {
@@ -93,7 +26,7 @@ const PreviewMenuItem = ({ item }: { item: MenuItem }) => {
         name: item.name,
         price: item.price,
         quantity: 1,
-        image: item.image
+        image: item.image || '/roti.png'
       });
     }
     setQuantity(prev => prev + 1);
@@ -105,13 +38,17 @@ const PreviewMenuItem = ({ item }: { item: MenuItem }) => {
       setQuantity(prev => prev - 1);
     }
   };
+  const getImageSrc = (imageUrl: string | null | undefined): string => {
+    if (!imageUrl) return '/roti.png';
+    return imageUrl.startsWith('http') ? imageUrl : '/roti.png';
+  };
 
   return (
     <div className="bg-white rounded-2xl p-3 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between shadow-md gap-4 md:gap-0">
       <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
         <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
           <Image
-            src={item.image}
+            src={getImageSrc(item.image)}
             alt={item.name}
             fill
             className="rounded-xl object-cover"
@@ -144,13 +81,50 @@ const PreviewMenuItem = ({ item }: { item: MenuItem }) => {
 };
 
 const PreviewMenu = () => {
-  const [activeCategory, setActiveCategory] = useState<CategoryId>('sweet');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = [
-    { id: 'sweet' as CategoryId, label: 'Sweet' },
-    { id: 'savory' as CategoryId, label: 'Savory' },
-    { id: 'lainnya' as CategoryId, label: 'Lainnya' }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesData, productsData] = await Promise.all([
+          menuService.getAllCategories(),
+          menuService.getAllProducts()
+        ]);
+        setCategories(categoriesData);
+        setProducts(productsData);
+        if (categoriesData.length > 0) {
+          setActiveCategory(categoriesData[0].id);
+        }
+        setLoading(false);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
+        setError('Failed to load menu data');
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const activeProducts = products.filter(product => 
+    product.category === activeCategory
+  );
+
+  // Get active category and its description directly from the categories array
+  const activeCategory_ = categories.find(cat => cat.id === activeCategory);
+  const activeDescription = activeCategory_?.description || "No description available";
+
+  if (loading) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="container mx-auto">
@@ -168,7 +142,7 @@ const PreviewMenu = () => {
                 : 'bg-primary text-black hover:bg-secondary'
             }`}
           >
-            {category.label}
+            {category.name}
           </button>
         ))}
       </div>
@@ -180,13 +154,13 @@ const PreviewMenu = () => {
             {/* Description */}
             <div className="flex items-center order-2 md:order-1">
               <p className="text-xl md:text-2xl font-ChickenSoup leading-relaxed">
-                {menuCategories[activeCategory].description}
+                {activeDescription}
               </p>
             </div>
 
             {/* Menu Items */}
             <div className="max-h-[400px] md:max-h-[500px] overflow-y-auto pr-2 md:pr-4 space-y-3 md:space-y-4 custom-scrollbar order-1 md:order-2">
-              {menuCategories[activeCategory].items.map((item) => (
+              {activeProducts.map((item) => (
                 <PreviewMenuItem key={item.id} item={item} />
               ))}
             </div>

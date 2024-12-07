@@ -5,11 +5,11 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { registerUser } from '@/services/authService';
 import { Eye, EyeOff } from 'lucide-react';
+import { authService } from '@/services/api';
 
 interface FormData {
-  namaLengkap: string;
+  nama_lengkap: string;  // Change from namaLengkap to nama_lengkap
   username: string;
   email: string;
   password: string;
@@ -19,7 +19,7 @@ const RegisterPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    namaLengkap: '',
+    nama_lengkap: '',
     username: '',
     email: '',
     password: '',
@@ -39,19 +39,21 @@ const RegisterPage = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await registerUser({
-        email: formData.email,
-        username: formData.username,
-        nama_lengkap: formData.namaLengkap,
-        password: formData.password
-      });
+      const response = await authService.register(formData);
       if (response.token) {
-        localStorage.setItem('token', response.token);
         router.push('/login');
       }
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Registration failed');
-      console.error('Registration failed:', error);
+      // Show more detailed error message
+      if (error.response?.data?.errors) {
+        // Show validation errors
+        const errorMessages = Object.values(error.response.data.errors).flat();
+        alert(errorMessages.join('\n'));
+      } else if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert('Registration failed. Please try again.');
+      }
     }
   };
 
@@ -82,13 +84,13 @@ const RegisterPage = () => {
                 Nama Lengkap
               </label>
               <input
-                type="text"
-                name="namaLengkap"
-                value={formData.namaLengkap}
-                onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary"
-                required
-              />
+  type="text"
+  name="nama_lengkap"  // Changed from namaLengkap
+  value={formData.nama_lengkap}
+  onChange={handleChange}
+  className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary"
+  required
+/>
             </div>
 
             <div>

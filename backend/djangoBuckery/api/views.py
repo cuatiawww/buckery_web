@@ -4,9 +4,15 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from .models import Category, Product
-from .serializers import CategorySerializer, ProductSerializer, UserSerializer
-from django.db import IntegrityError 
+from .models import Category, Product, TimelineEvent, TeamMember
+from .serializers import (
+    CategorySerializer, 
+    ProductSerializer, 
+    UserSerializer,
+    TimelineEventSerializer,
+    TeamMemberSerializer
+)
+from django.db import IntegrityError
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -16,9 +22,25 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+class TimelineEventViewSet(viewsets.ModelViewSet):
+    queryset = TimelineEvent.objects.all()
+    serializer_class = TimelineEventSerializer
+
+class TeamMemberViewSet(viewsets.ModelViewSet):
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer
+
+    def get_queryset(self):
+        queryset = TeamMember.objects.all()
+        member_type = self.request.query_params.get('type', None)
+        if member_type:
+            queryset = queryset.filter(member_type=member_type)
+        return queryset
+
+
 @api_view(['POST'])
 def login(request):
-    username = request.data.get('username')  # Mengambil username bukan email
+    username = request.data.get('username')
     password = request.data.get('password')
     
     print(f"Login attempt: {username}")  # Debug

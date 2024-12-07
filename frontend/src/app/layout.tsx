@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-
+import { AuthProvider } from "@/context/AuthContext";
 
 const beachDay = localFont({
   src: "./fonts/beachday.ttf",
@@ -31,10 +31,12 @@ export default function RootLayout({
       <body
         className={`${beachDay.variable} ${ChickenSoup.variable} antialiased min-h-screen`}
       >
-        <CartProvider>
-          <Navbar />
-          <main>{children}</main>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Navbar />
+            <main>{children}</main>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
