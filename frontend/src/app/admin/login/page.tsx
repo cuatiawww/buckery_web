@@ -1,51 +1,34 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+'use client';
 
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Eye, EyeOff } from 'lucide-react';
-import { authService, FormDataLogin } from '@/services/api';
+import { adminService } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
-const LoginPage = () => {
+const AdminLoginPage = () => {
   const router = useRouter();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState<FormDataLogin>({
+  const [formData, setFormData] = useState({
     emailUsername: '',
     password: '',
     rememberMe: false
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await authService.userLogin(formData);
+      const response = await adminService.login(formData);
       if (response.token) {
-        // Use the context's login function
         login(response.token, response.username, response.user_type);
-        router.push('/'); // Redirect to home page
+        router.push('/admin/dashboard'); // Redirect to admin dashboard
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.data?.message) {
         alert(error.response.data.message);
-      } else if (error.response?.data?.errors) {
-        const errorMessages = Object.values(error.response.data.errors).flat();
-        alert(errorMessages.join('\n'));
       } else {
         alert('Login failed. Please check your credentials.');
       }
@@ -59,7 +42,7 @@ const LoginPage = () => {
         <div className="w-full h-full rounded-3xl overflow-hidden">
           <Image
             src="/Pict1.jpg"
-            alt="Buckery"
+            alt="Buckery Admin"
             width={600}
             height={800}
             className="object-cover w-full h-full"
@@ -71,7 +54,7 @@ const LoginPage = () => {
       {/* Right side - Form */}
       <div className="w-full md:w-1/2 bg-primary p-8 flex flex-col justify-center">
         <div className="max-w-md mx-auto w-full">
-          <h2 className="text-3xl font-bold mb-8 text-center">LOGIN</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">ADMIN LOGIN</h2>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
@@ -82,10 +65,10 @@ const LoginPage = () => {
                 type="text"
                 name="emailUsername"
                 value={formData.emailUsername}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, emailUsername: e.target.value })}
                 className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
                 required
-                placeholder="Masukkan username Anda"
+                placeholder="Enter your username"
               />
             </div>
 
@@ -98,15 +81,14 @@ const LoginPage = () => {
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
-                  onChange={handleChange}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
-                  autoComplete="current-password"
                   required
-                  placeholder="Masukkan password Anda"
+                  placeholder="Enter your password"
                 />
                 <button
                   type="button"
-                  onClick={togglePasswordVisibility}
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
                 >
                   {showPassword ? (
@@ -122,13 +104,12 @@ const LoginPage = () => {
               <input
                 type="checkbox"
                 id="rememberMe"
-                name="rememberMe"
                 checked={formData.rememberMe}
-                onChange={handleChange}
+                onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
                 className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
               />
-              <label htmlFor="rememberMe" className="ml-2 block text-sm font-semibold">
-                Ingat Saya
+              <label htmlFor="rememberMe" className="ml-2 text-sm font-semibold">
+                Remember Me
               </label>
             </div>
 
@@ -136,17 +117,8 @@ const LoginPage = () => {
               type="submit"
               className="w-full p-3 bg-tertiary text-black rounded-lg font-semibold border-4 border-black hover:bg-secondary transition-colors"
             >
-              Masuk
+              Login
             </button>
-
-            <div className="text-center mt-4">
-              <p className="text-sm font-normal">
-                Belum punya akun?{' '}
-                <Link href="/register" className="text-blue-600 hover:text-blue-800 font-semibold">
-                  Daftar
-                </Link>
-              </p>
-            </div>
           </form>
         </div>
       </div>
@@ -154,4 +126,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AdminLoginPage;

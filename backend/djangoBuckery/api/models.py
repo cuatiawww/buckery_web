@@ -1,4 +1,40 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+class CustomUser(AbstractUser):
+    USER_TYPE_CHOICES = (
+        ('ADMIN', 'Admin'),
+        ('STAFF', 'Staff'),
+        ('USER', 'Regular User'),
+    )
+    
+    user_type = models.CharField(
+        max_length=10, 
+        choices=USER_TYPE_CHOICES, 
+        default='USER'
+    )
+    nama_lengkap = models.CharField(max_length=255)
+
+    def save(self, *args, **kwargs):
+        # Set is_staff and is_superuser based on user_type
+        if self.user_type == 'ADMIN':
+            self.is_staff = True
+            self.is_superuser = True
+        elif self.user_type == 'STAFF':
+            self.is_staff = True
+            self.is_superuser = False
+        else:
+            self.is_staff = False
+            self.is_superuser = False
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.username} ({self.get_user_type_display()})"
+
+    class Meta:
+        permissions = [
+            ("can_access_admin", "Can access admin site"),
+        ]
 
 #CRUD DATABASE
 
