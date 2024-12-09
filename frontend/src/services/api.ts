@@ -103,6 +103,20 @@ export interface TimelineEvent {
     order: number;
   }
 
+  export interface ContactInfo {
+    id: number;  // Tambahkan ini juga
+    location: string;
+    whatsapp_number: string;
+    phone_number2: string | null;
+    email: string;
+    instagram: string;
+    weekday_hours: string;
+    saturday_hours: string;
+    sunday_hours: string;
+    latitude: number | null;  // Tambahkan ini
+    longitude: number | null; // Tambahkan ini
+  }
+
 
 // Auth services
 export const authService = {
@@ -319,6 +333,44 @@ export const aboutService = {
       } catch (error) {
         throw error;
       }
+    }
+  };
+
+  // CONTACT INFO
+  export const contactService = {
+    getContactInfo: async () => {
+      try {
+        const response = await api.get<ContactInfo>('/contact-info/');
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching contact info:', error);
+        throw error;
+      }
+    },
+  
+    sendWhatsAppMessage: (data: {
+      name: string;
+      email: string;
+      phone: string;
+      message: string;
+    }, whatsappNumber: string) => {
+      // Format pesan
+      const formattedMessage = `*Pesan dari Website*
+  *Nama:* ${data.name}
+  *Email:* ${data.email}
+  *No. Telp:* ${data.phone}
+  
+  *Pesan:*
+  ${data.message}`;
+      
+      // Encode pesan untuk URL
+      const encodedMessage = encodeURIComponent(formattedMessage);
+      
+      // Buat URL WhatsApp
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+      
+      // Buka WhatsApp di tab baru
+      window.open(whatsappUrl, '_blank');
     }
   };
 

@@ -2,15 +2,16 @@ import logging
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.db import transaction  # Tambahkan import ini
-from .models import Category, CustomUser, Product, TimelineEvent, TeamMember
+from .models import Category, ContactInformation, CustomUser, Product, TimelineEvent, TeamMember
 from .serializers import (
     AdminStaffSerializer,
-    CategorySerializer, 
+    CategorySerializer,
+    ContactInformationSerializer, 
     ProductSerializer, 
     UserSerializer,
     TimelineEventSerializer,
@@ -358,3 +359,9 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
         if member_type:
             queryset = queryset.filter(member_type=member_type)
         return queryset
+    
+# CONTACT INFO
+class ContactInformationViewSet(viewsets.ModelViewSet):
+    queryset = ContactInformation.objects.all()
+    serializer_class = ContactInformationSerializer
+    permission_classes = [AllowAny]  # type: ignore # Allow public access to contact info

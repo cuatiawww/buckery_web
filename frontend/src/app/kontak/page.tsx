@@ -1,36 +1,80 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { MapPin, Phone, Mail, Clock, Instagram } from 'lucide-react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Link from 'next/link';
 import Footer from '@/components/Footer';
+import api from '@/services/api';
 
-const contactInfo = {
-  location: 'Jl. Contoh No. 123, Kota Anda',
-  hours: {
-    weekday: '08.00 - 17.00',
-    saturday: '08.00 - 15.00',
-    sunday: 'Tutup'
-  },
-  phone: ['+62 812-3456-7890', '+62 821-9876-5432'],
-  email: 'info@buckery.com',
-  instagram: '@buckery.id'
-};
+interface ContactInfo {
+  id: number;
+  location: string;
+  whatsapp_number: string;
+  phone_number2: string | null;
+  email: string;
+  instagram: string;
+  weekday_hours: string;
+  saturday_hours: string;
+  sunday_hours: string;
+  latitude: number | null;
+  longitude: number | null;
+}
 
 export default function Page() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const response = await api.get('/contact-info/');
+        if (response.data && response.data.length > 0) {
+          setContactInfo(response.data[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching contact info:', error);
+      }
+    };
+
+    fetchContactInfo();
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission
+    const formData = new FormData(e.currentTarget);
+    
+    // Format pesan WhatsApp
+    const message = `*Pesan dari Website*
+*Nama:* ${formData.get('name')}
+*Email:* ${formData.get('email')}
+*No. Telp:* ${formData.get('phone')}
+
+*Pesan:*
+${formData.get('message')}`;
+
+    // Buat URL WhatsApp dengan nomor dan pesan
+    const whatsappNumber = contactInfo?.whatsapp_number || '';
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    
+    // Buka WhatsApp di tab baru
+    window.open(whatsappUrl, '_blank');
   };
+
+  if (!contactInfo) {
+    return (
+      <main className="min-h-screen bg-yellow-400">
+        <Navbar />
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-black"></div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-yellow-400">
       <Navbar />
       {/* Header Section */}
       <div className="bg-yellow-400 pt-32 pb-16 relative">
-        {/* Title */}
         <h1 className="text-4xl font-bold text-center mb-16">KONTAK</h1>
 
         {/* Wave Border */}
@@ -73,19 +117,20 @@ export default function Page() {
                   <Clock className="w-6 h-6 mt-1 flex-shrink-0" />
                   <div>
                     <h3 className="font-bold mb-1">Jam Operasional</h3>
-                    <p>Senin - Jumat: {contactInfo.hours.weekday}</p>
-                    <p>Sabtu: {contactInfo.hours.saturday}</p>
-                    <p>Minggu: {contactInfo.hours.sunday}</p>
+                    <p>Senin - Jumat: {contactInfo.weekday_hours}</p>
+                    <p>Sabtu: {contactInfo.saturday_hours}</p>
+                    <p>Minggu: {contactInfo.sunday_hours}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-4">
                   <Phone className="w-6 h-6 mt-1 flex-shrink-0" />
                   <div>
-                    <h3 className="font-bold mb-1">Telepon</h3>
-                    {contactInfo.phone.map((number, index) => (
-                      <p key={index}>{number}</p>
-                    ))}
+                    <h3 className="font-bold mb-1">WhatsApp</h3>
+                    <p>{contactInfo.whatsapp_number}</p>
+                    {contactInfo.phone_number2 && (
+                      <p>{contactInfo.phone_number2}</p>
+                    )}
                   </div>
                 </div>
 
@@ -144,6 +189,7 @@ export default function Page() {
                     name="phone"
                     className="w-full px-4 py-2 rounded-xl border-2 border-black"
                     placeholder="Masukkan nomor telepon"
+                    required
                   />
                 </div>
 
@@ -163,7 +209,7 @@ export default function Page() {
                   type="submit"
                   className="w-full bg-tertiary text-black font-bold py-3 px-6 rounded-xl border-4 border-black hover:bg-primary transition-colors"
                 >
-                  Kirim Pesan
+                  Kirim Pesan via WhatsApp
                 </button>
               </form>
             </div>
@@ -171,16 +217,39 @@ export default function Page() {
 
           {/* Map Section */}
           <div className="mt-16">
-            <h2 className="text-3xl font-bold mb-6">LOKASI KAMI</h2>
-            <div className="w-full h-96 bg-white rounded-2xl border-4 border-black overflow-hidden">
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <p className="text-gray-500">Peta Lokasi</p>
-              </div>
-            </div>
-          </div>
+  <h2 className="text-3xl font-bold mb-6">LOKASI KAMI</h2>
+  <div className="w-full h-96 bg-white rounded-2xl border-4 border-black overflow-hidden">
+    {contactInfo.latitude && contactInfo.longitude ? (
+      <iframe
+      src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${contactInfo.latitude},${contactInfo.longitude}&zoom=15`}
+        width="100%"
+        height="100%"
+        style={{ border: 0 }}
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    ) : (
+      <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center">
+        <p className="text-gray-500 mb-2">Peta Lokasi</p>
+        {contactInfo.location && (
+          <a 
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactInfo.location)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-700 underline"
+          >
+            Buka di Google Maps
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+
         </div>
       </div>
-      {/* Footer */}
+      
       <Footer />
     </main>
   );

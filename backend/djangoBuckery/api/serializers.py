@@ -1,17 +1,22 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .models import Category, CustomUser, Product, TimelineEvent, TeamMember
+from .models import Category, ContactInformation, CustomUser, Product, TimelineEvent, TeamMember
+
+# CATEGORY
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'description', 'created_at']
+# PRODUCT or MENU
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+# TENTANG KAMI
 
 class TimelineEventSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +27,8 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamMember
         fields = ['id', 'name', 'role', 'quote', 'image', 'member_type', 'order']
+
+# USER, ADMIN, STAFF
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
@@ -112,3 +119,9 @@ class AdminStaffSerializer(serializers.ModelSerializer):
             return user
         except Exception as e:
             raise serializers.ValidationError(str(e))
+        
+# CONTACT INFO
+class ContactInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactInformation
+        fields = '__all__'

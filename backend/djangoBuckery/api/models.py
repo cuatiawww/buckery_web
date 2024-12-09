@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+# CUSTOM USER
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
         ('ADMIN', 'Admin'),
@@ -109,3 +110,28 @@ class TeamMember(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.role}"
+    
+# CONTACT INFORMATION
+    
+class ContactInformation(models.Model):
+    location = models.CharField(max_length=255)
+    whatsapp_number = models.CharField(max_length=20)  # Format: 628123456789
+    phone_number2 = models.CharField(max_length=20, null=True, blank=True)
+    email = models.EmailField()
+    instagram = models.CharField(max_length=50)
+    
+    # Operation hours
+    weekday_hours = models.CharField(max_length=50)  # e.g., "08.00 - 17.00"
+    saturday_hours = models.CharField(max_length=50)
+    sunday_hours = models.CharField(max_length=50)
+
+    # Maps coordinates
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    
+    class Meta:
+        verbose_name = 'Contact Information'
+        verbose_name_plural = 'Contact Information'
+
+    def __str__(self):
+        return f"Contact Information - {self.whatsapp_number}"
