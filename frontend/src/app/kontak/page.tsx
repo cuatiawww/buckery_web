@@ -29,12 +29,14 @@ export default function Page() {
         const response = await api.get('/contact-info/');
         if (response.data && response.data.length > 0) {
           setContactInfo(response.data[0]);
+          // Tambahkan log untuk debugging
+          console.log('Contact Info:', response.data[0]);
         }
       } catch (error) {
         console.error('Error fetching contact info:', error);
       }
     };
-
+  
     fetchContactInfo();
   }, []);
 
@@ -104,7 +106,7 @@ ${formData.get('message')}`;
             <div className="space-y-8">
               <h2 className="text-3xl font-bold mb-6">HUBUNGI KAMI</h2>
               
-              <div className="bg-white p-6 rounded-2xl border-4 border-black space-y-6">
+              <div className="bg-primary p-6 rounded-2xl border-4 border-black space-y-6">
                 <div className="flex items-start space-x-4">
                   <MapPin className="w-6 h-6 mt-1 flex-shrink-0" />
                   <div>
@@ -156,7 +158,7 @@ ${formData.get('message')}`;
             <div>
               <h2 className="text-3xl font-bold mb-6">KIRIM PESAN</h2>
               
-              <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border-4 border-black space-y-4">
+              <form onSubmit={handleSubmit} className="bg-primary p-6 rounded-2xl border-4 border-black space-y-4">
                 <div>
                   <label htmlFor="name" className="block font-bold mb-2">Nama</label>
                   <input
@@ -215,35 +217,38 @@ ${formData.get('message')}`;
             </div>
           </div>
 
-          {/* Map Section */}
-          <div className="mt-16">
+{/* Map Section */}
+<div className="mt-16">
   <h2 className="text-3xl font-bold mb-6">LOKASI KAMI</h2>
   <div className="w-full h-96 bg-white rounded-2xl border-4 border-black overflow-hidden">
-    {contactInfo.latitude && contactInfo.longitude ? (
-      <iframe
-      src={`https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${contactInfo.latitude},${contactInfo.longitude}&zoom=15`}
-        width="100%"
-        height="100%"
+    <div className="w-full h-full">
+      <iframe 
+        width="100%" 
+        height="100%" 
+        frameBorder="0" 
+        scrolling="no" 
+        marginHeight={0} 
+        marginWidth={0} 
+        src={`https://www.openstreetmap.org/export/embed.html?bbox=${
+          Number(contactInfo.longitude) - 0.01}%2C${
+          Number(contactInfo.latitude) - 0.01}%2C${
+          Number(contactInfo.longitude) + 0.01}%2C${
+          Number(contactInfo.latitude) + 0.01
+        }&layer=mapnik&marker=${contactInfo.latitude}%2C${contactInfo.longitude}`}
         style={{ border: 0 }}
-        allowFullScreen
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
       />
-    ) : (
-      <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center">
-        <p className="text-gray-500 mb-2">Peta Lokasi</p>
-        {contactInfo.location && (
-          <a 
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contactInfo.location)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700 underline"
-          >
-            Buka di Google Maps
-          </a>
-        )}
+      <div className="p-2 text-center bg-white">
+        <p className="text-gray-600 mb-1">{contactInfo.location}</p>
+        <a 
+          href={`https://www.openstreetmap.org/?mlat=${contactInfo.latitude}&mlon=${contactInfo.longitude}#map=16/${contactInfo.latitude}/${contactInfo.longitude}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:text-blue-700 underline text-sm"
+        >
+          Lihat Peta Lebih Besar
+        </a>
       </div>
-    )}
+    </div>
   </div>
 </div>
 

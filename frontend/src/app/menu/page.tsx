@@ -107,7 +107,7 @@ const MenuPage = () => {
       {/* Header Section */}
       <div className="bg-primary pt-24 pb-16 relative">
         <div className="container mx-auto px-4 flex justify-between items-center mb-8">
-          <Link href="/beranda" className="flex items-center text-black">
+          <Link href="/" className="flex items-center text-black">
             <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
             <span className="text-xl font-bold">KEMBALI</span>
           </Link>

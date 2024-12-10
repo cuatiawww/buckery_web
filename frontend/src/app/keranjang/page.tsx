@@ -26,7 +26,7 @@ export default function CartPage() {
   };
 
   const CartHeader = () => (
-    <div className="bg-yellow-400 pt-24 pb-16 relative">
+    <div className="bg-primary pt-24 pb-16 relative">
       <div className="container mx-auto px-4 flex justify-between items-center mb-8">
         <Link href="/menu" className="flex items-center text-black">
           <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
@@ -66,7 +66,7 @@ export default function CartPage() {
   );
 
   const DeliveryInfo = () => (
-    <div className="bg-green-200 p-4 rounded-xl border-4 border-black mb-8">
+    <div className="bg-secondary p-4 rounded-xl border-4 border-black mb-8">
       <h2 className="text-center font-bold text-xl">Delivery Hour</h2>
       <p className="text-center">{deliveryHours.weekday}</p>
     </div>
@@ -75,7 +75,7 @@ export default function CartPage() {
   const CartItems = () => (
     <div className="space-y-8">
       <div className="bg-white rounded-xl border-4 border-black overflow-hidden">
-        <div className="grid grid-cols-3 bg-blue-200 p-4 font-bold text-xl">
+        <div className="grid grid-cols-3 bg-tertiary p-4 font-bold text-xl">
           <div>PRODUK</div>
           <div className="text-center">JUMLAH</div>
           <div className="text-right">SUB TOTAL</div>
@@ -91,7 +91,7 @@ export default function CartPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-3 bg-blue-200 p-4 font-bold text-xl">
+        <div className="grid grid-cols-3 bg-tertiary p-4 font-bold text-xl">
           <div className="col-span-2">TOTAL</div>
           <div className="text-right">Rp {calculateTotal().toLocaleString()}</div>
         </div>
@@ -102,7 +102,7 @@ export default function CartPage() {
         <div className="flex justify-end">
           <Link 
             href="/datapemesanan" 
-            className="flex items-center space-x-2 bg-yellow-400 text-black font-bold py-4 px-8 rounded-xl border-4 border-black hover:bg-yellow-500 transition-colors"
+            className="flex items-center space-x-2 bg-tertiary text-black font-bold py-4 px-8 rounded-xl border-4 border-black hover:bg-yellow-500 transition-colors"
           >
             <span className="text-xl">CHECKOUT</span>
             <Image src="/direct-right.svg" alt="Next" width={40} height={40} priority />

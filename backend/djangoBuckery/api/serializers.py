@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .models import Category, ContactInformation, CustomUser, Product, TimelineEvent, TeamMember
+from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember
 
 # CATEGORY
 
@@ -125,3 +125,9 @@ class ContactInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactInformation
         fields = '__all__'
+
+#TESTIMONY
+class TestimonialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testimonial
+        fields = ['id', 'username', 'message', 'tagline', 'image', 'is_active', 'order', 'created_at']

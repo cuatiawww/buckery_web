@@ -5,7 +5,8 @@ from .views import (
     ProductViewSet, 
     TimelineEventViewSet,
     TeamMemberViewSet,
-    ContactInformationViewSet,  # Updated from ContactInfoViewSet
+    ContactInformationViewSet,
+    TestimonialViewSet,  
     user_login,
     user_register,
     admin_staff_login,
@@ -21,6 +22,7 @@ router.register('products', ProductViewSet, basename='product')
 router.register('timeline-events', TimelineEventViewSet, basename='timeline-event')
 router.register('team-members', TeamMemberViewSet, basename='team-member')
 router.register('contact-info', ContactInformationViewSet, basename='contact-info')
+router.register('testimonials', TestimonialViewSet, basename='testimonial')  
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/api';
+import Cookies from 'js-cookie';
+
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -24,36 +26,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check authentication status on mount
     const checkAuth = () => {
       const token = localStorage.getItem('token');
       const savedUsername = localStorage.getItem('username');
       const savedUserType = localStorage.getItem('userType');
       
       if (token && savedUsername) {
+        // Set both localStorage and cookies
+        localStorage.setItem('token', token);
+        localStorage.setItem('username', savedUsername);
+        localStorage.setItem('userType', savedUserType || '');
+        
+        Cookies.set('token', token);
+        Cookies.set('username', savedUsername);
+        Cookies.set('userType', savedUserType || '');
+        
         setIsAuthenticated(true);
         setUsername(savedUsername);
         setUserType(savedUserType);
       } else {
-        // Clear any partial state if token is missing
-        setIsAuthenticated(false);
-        setUsername(null);
-        setUserType(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        localStorage.removeItem('userType');
-        localStorage.removeItem('rememberMe');
+        clearAuth();
       }
     };
 
     checkAuth();
   }, []);
 
+  const clearAuth = () => {
+    // Clear localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('rememberMe');
+    
+    // Clear cookies
+    Cookies.remove('token');
+    Cookies.remove('username');
+    Cookies.remove('userType');
+    
+    // Clear state
+    setIsAuthenticated(false);
+    setUsername(null);
+    setUserType(null);
+  };
+
   const login = (token: string, username: string, userType: string) => {
+    // Set localStorage
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
     localStorage.setItem('userType', userType);
     
+    // Set cookies
+    Cookies.set('token', token);
+    Cookies.set('username', username);
+    Cookies.set('userType', userType);
+    
+    // Update state
     setIsAuthenticated(true);
     setUsername(username);
     setUserType(userType);

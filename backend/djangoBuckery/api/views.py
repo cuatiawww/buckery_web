@@ -7,12 +7,13 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.db import transaction  # Tambahkan import ini
-from .models import Category, ContactInformation, CustomUser, Product, TimelineEvent, TeamMember
+from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember
 from .serializers import (
     AdminStaffSerializer,
     CategorySerializer,
     ContactInformationSerializer, 
-    ProductSerializer, 
+    ProductSerializer,
+    TestimonialSerializer, 
     UserSerializer,
     TimelineEventSerializer,
     TeamMemberSerializer
@@ -63,8 +64,7 @@ def user_login(request):
 @api_view(['POST'])
 def user_register(request):
     logger.info(f"Received registration request with data: {request.data}")
-    
-    with transaction.atomic():  # Removed type ignore comment
+    with transaction.atomic():  
         try:
             serializer = UserSerializer(data=request.data)
             if serializer.is_valid():
@@ -102,7 +102,7 @@ def user_register(request):
 def register_staff(request):
     """Create new staff account (admin only)"""
     try:
-        # Set user type to STAFF
+        # Set user typ to STAFF
         data = request.data.copy()
         data['user_type'] = 'STAFF'
         
@@ -180,14 +180,12 @@ def admin_staff_login(request):
 def create_staff(request):
     """Create new staff account (admin only)"""
     try:
-        # Add staff type
         data = request.data.copy()
         data['user_type'] = 'STAFF'
         
         serializer = AdminStaffSerializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
-            # Ensure user is staff
             user.is_staff = True
             user.save()
             
@@ -249,7 +247,6 @@ def update_staff(request, staff_id):
     try:
         user = CustomUser.objects.get(id=staff_id, user_type='STAFF')
         
-        # Update allowed fields
         if 'nama_lengkap' in request.data:
             user.nama_lengkap = request.data['nama_lengkap']
         if 'email' in request.data:
@@ -295,7 +292,7 @@ def logout_view(request):
                 token = Token.objects.get(key=token_key)
                 token.delete()
             except Token.DoesNotExist:
-                pass  # Token not found is okay
+                pass 
 
         return Response({
             'status': 'success',
@@ -303,7 +300,6 @@ def logout_view(request):
         })
     except Exception as e:
         logger.error(f"Error during logout: {str(e)}")
-        # Still return success since the frontend will clear the state anyway
         return Response({
             'status': 'success',
             'message': 'Successfully logged out'
@@ -364,4 +360,21 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
 class ContactInformationViewSet(viewsets.ModelViewSet):
     queryset = ContactInformation.objects.all()
     serializer_class = ContactInformationSerializer
-    permission_classes = [AllowAny]  # type: ignore # Allow public access to contact info
+    permission_classes = [AllowAny]  # type: ignore 
+
+#TESIMONY
+class TestimonialViewSet(viewsets.ModelViewSet):
+    queryset = Testimonial.objects.filter(is_active=True)
+    serializer_class = TestimonialSerializer
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [AllowAny]
+        return [permission() for permission in permission_classes]
+    
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Testimonial.objects.all()
+        return Testimonial.objects.filter(is_active=True)

@@ -32,7 +32,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost }) =
   };
 
   return (
-    <div className="bg-yellow-200 rounded-xl border-2 border-black p-4 space-y-2">
+    <div className="bg-primary rounded-xl border-2 border-black p-4 space-y-2">
       <div className="flex justify-between items-center">
         <span className="font-bold">Total harga</span>
         <span className="font-bold">Rp {subtotal.toLocaleString()}</span>
@@ -47,7 +47,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost }) =
       </div>
       <button 
         onClick={handlePayment}
-        className="w-full bg-sky-200 text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-4"
+        className="w-full bg-tertiary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-4"
       >
         Bayar
       </button>
@@ -104,25 +104,37 @@ const PaymentPage = () => {
       <Navbar />
       
       {/* Header */}
-      <div className="container mx-auto px-4 pt-24">
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/order-data" className="flex items-center text-black">
-            <Image src="/direct-left.svg" alt="Back" width={32} height={32} />
-            <span className="text-xl font-bold">KEMBALI</span>
-          </Link>
-          <h1 className="text-4xl font-bold text-black">CHECKOUT</h1>
-          <div className="w-32" />
+      <div className="bg-primary pt-24 pb-16 relative">
+      <div className="container mx-auto px-4 flex justify-between items-center mb-8">
+        <Link href="/datapemesanan" className="flex items-center text-black">
+          <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
+          <span className="text-xl font-bold">KEMBALI</span>
+        </Link>
+        
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-black">Checkout</h1>
         </div>
+        
+        <div className="w-[144px]" />
       </div>
 
-      {/* Wave Border */}
-      <div className="relative">
-        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-          <path
-            fill="#F8E6C2"
-            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-          />
-        </svg>
+        {/* Wave Border */}
+        <div className="absolute bottom-50 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+            <path
+              fill="#000000"
+              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+            />
+          </svg>
+        </div>
+        <div className="absolute -bottom-1 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+            <path
+              fill="#F8E6C2"
+              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+            />
+          </svg>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -132,19 +144,19 @@ const PaymentPage = () => {
             {/* Left Column */}
             <div className="md:col-span-2 space-y-4">
               {/* Store Info */}
-              <div className="bg-green-200 rounded-xl border-2 border-black p-4">
+              <div className="bg-secondary rounded-xl border-2 border-black p-4">
                 <h3 className="font-bold mb-2">Dikirim dari : Buckery Store</h3>
               </div>
               
               {/* Shipping Method */}
-              <div className="bg-yellow-200 rounded-xl border-2 border-black p-4">
+              <div className="bg-primary rounded-xl border-2 border-black p-4">
                 <h3 className="font-bold mb-2">
                   Pengiriman : {getDeliveryLabel(orderData.deliveryMethod)}
                 </h3>
               </div>
 
               {/* Recipient Info */}
-              <div className="bg-yellow-200 rounded-xl border-2 border-black p-4 space-y-2">
+              <div className="bg-primary rounded-xl border-2 border-black p-4 space-y-2">
                 <h3 className="font-bold mb-4">Alamat Penerima</h3>
                 <p className="font-bold">{orderData.name}</p>
                 <p className="font-bold">{orderData.phone}</p>
@@ -154,14 +166,14 @@ const PaymentPage = () => {
                 )}
                 <Link 
                   href="/order-data"
-                  className="inline-block bg-sky-200 text-black font-bold py-2 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-2"
+                  className="inline-block bg-secondary text-black font-bold py-2 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-2"
                 >
                   Ganti Alamat
                 </Link>
               </div>
 
               {/* Order Details */}
-              <div className="bg-yellow-200 rounded-xl border-2 border-black p-4">
+              <div className="bg-primary rounded-xl border-2 border-black p-4">
                 <h3 className="font-bold mb-4">Detail Pesanan</h3>
                 <div className="space-y-4">
                   {items.map((item) => (

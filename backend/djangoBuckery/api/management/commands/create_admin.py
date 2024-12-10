@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from api.models import CustomUser
 
+# CUSTOM ADMIN
 class Command(BaseCommand):
     help = 'Create a superuser/admin account'
 

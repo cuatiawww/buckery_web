@@ -15,10 +15,14 @@ const api = axios.create({
 // Request interceptor untuk menambahkan token ke header
 api.interceptors.request.use(
   (config) => {
+    // Get the token from localStorage
     const token = localStorage.getItem('token');
-    if (token) {
+    
+    // If token exists, add it to the headers
+    if (token && config.headers) {
       config.headers.Authorization = `Token ${token}`;
     }
+    
     return config;
   },
   (error) => {
@@ -115,6 +119,17 @@ export interface TimelineEvent {
     sunday_hours: string;
     latitude: number | null;  // Tambahkan ini
     longitude: number | null; // Tambahkan ini
+  }
+
+  export interface Testimonial {
+    id: number;
+    username: string;
+    message: string;
+    tagline: string;
+    image: string | null;
+    is_active: boolean;
+    order: number;
+    created_at: string;
   }
 
 
@@ -214,41 +229,32 @@ export const authService = {
 
 // Admin auth service
 export const adminService = {
-  login: async (credentials: FormDataLogin) => {
+  login: async (formData: FormDataLogin) => {
     try {
       const response = await api.post<LoginResponse>('/auth/admin-login/', {
-        username: credentials.emailUsername,
-        password: credentials.password
+        username: formData.emailUsername,
+        password: formData.password
       });
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('username', response.data.username);
         localStorage.setItem('userType', response.data.user_type);
-        if (credentials.rememberMe) {
+        if (formData.rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
       }
       
       return response.data;
     } catch (error) {
-      console.error('Admin/Staff login error:', error);
+      console.error('Admin login error:', error);
       throw error;
     }
   },
 
   createStaff: async (staffData: StaffData) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await api.post('/auth/staff/create/', staffData, {
-        headers: {
-          'Authorization': `Token ${token}`
-        }
-      });
+      const response = await api.post('/auth/staff/create/', staffData);
       return response.data;
     } catch (error) {
       console.error('Error creating staff:', error);
@@ -259,18 +265,27 @@ export const adminService = {
   listStaff: async () => {
     try {
       const token = localStorage.getItem('token');
+      console.log('Using token:', token); // Debug log
+      
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await api.get('/auth/staff/list/', {
-        headers: {
-          'Authorization': `Token ${token}`
-        }
-      });
+      const response = await api.get('/auth/staff/list/');
+      console.log('Staff list response:', response.data); // Debug log
       return response.data;
     } catch (error) {
       console.error('Error fetching staff list:', error);
+      throw error;
+    }
+  },
+
+  updateStaff: async (staffId: number, data: Partial<StaffData>) => {
+    try {
+      const response = await api.post(`/auth/staff/update/${staffId}/`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating staff:', error);
       throw error;
     }
   }
@@ -371,6 +386,56 @@ export const aboutService = {
       
       // Buka WhatsApp di tab baru
       window.open(whatsappUrl, '_blank');
+    }
+  };
+
+  // TESTIMONY
+  export const testimonialService = {
+    getAllTestimonials: async () => {
+      try {
+        const response = await api.get<Testimonial[]>('/testimonials/');
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching testimonials:', error);
+        throw error;
+      }
+    },
+  
+    createTestimonial: async (data: FormData) => {
+      try {
+        const response = await api.post<Testimonial>('/testimonials/', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error creating testimonial:', error);
+        throw error;
+      }
+    },
+  
+    updateTestimonial: async (id: number, data: FormData) => {
+      try {
+        const response = await api.put<Testimonial>(`/testimonials/${id}/`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error updating testimonial:', error);
+        throw error;
+      }
+    },
+  
+    deleteTestimonial: async (id: number) => {
+      try {
+        await api.delete(`/testimonials/${id}/`);
+      } catch (error) {
+        console.error('Error deleting testimonial:', error);
+        throw error;
+      }
     }
   };
 

@@ -6,7 +6,8 @@ from .models import (
     Product, 
     TimelineEvent, 
     TeamMember,
-    ContactInformation
+    ContactInformation,
+    Testimonial 
 )
 
 class CustomUserAdmin(UserAdmin):
@@ -55,6 +56,14 @@ class TeamMemberAdmin(admin.ModelAdmin):
 class ContactInformationAdmin(admin.ModelAdmin):
     list_display = ('location', 'whatsapp_number', 'email', 'instagram')
     search_fields = ('location', 'whatsapp_number', 'email')
+
+@admin.register(Testimonial) 
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('username', 'tagline', 'is_active', 'order', 'created_at')
+    list_filter = ('is_active',)
+    list_editable = ('order', 'is_active') 
+    search_fields = ('username', 'message', 'tagline')
+    ordering = ('order', '-created_at')
 
 # Register CustomUser
 admin.site.register(CustomUser, CustomUserAdmin)

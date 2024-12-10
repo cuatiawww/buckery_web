@@ -74,21 +74,18 @@ const handleSubmit = (e: React.FormEvent) => {
       
       {/* Header with Navigation */}
       <div className="bg-primary pt-24 pb-16 relative">
-        <div className="container mx-auto px-4 flex justify-between items-center mb-8">
-          <Link href="/keranjang" className="flex items-center text-black">
-            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
-            <span className="text-xl font-bold">KEMBALI</span>
-          </Link>
-          
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-black">Data Pemesanan</h1>
-          </div>
-          
-          <Link href="/keranjang" className="flex items-center text-black">
-            <span className="text-xl font-bold">LANJUTKAN</span>
-            <Image src="/direct-right.svg" alt="Next" width={60} height={40} priority />
-          </Link>
+      <div className="container mx-auto px-4 flex justify-between items-center mb-8">
+        <Link href="/keranjang" className="flex items-center text-black">
+          <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
+          <span className="text-xl font-bold">KEMBALI</span>
+        </Link>
+        
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-black">Data Pemesanan</h1>
         </div>
+        
+        <div className="w-[144px]" />
+      </div>
 
         {/* Wave Border */}
         <div className="absolute bottom-50 left-0 right-0">

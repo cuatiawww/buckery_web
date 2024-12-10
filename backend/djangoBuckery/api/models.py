@@ -17,7 +17,7 @@ class CustomUser(AbstractUser):
     nama_lengkap = models.CharField(max_length=255)
 
     def save(self, *args, **kwargs):
-        # Set is_staff and is_superuser based on user_type
+        # set staff dan superuser
         if self.user_type == 'ADMIN':
             self.is_staff = True
             self.is_superuser = True
@@ -115,17 +115,13 @@ class TeamMember(models.Model):
     
 class ContactInformation(models.Model):
     location = models.CharField(max_length=255)
-    whatsapp_number = models.CharField(max_length=20)  # Format: 628123456789
+    whatsapp_number = models.CharField(max_length=20)  
     phone_number2 = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField()
     instagram = models.CharField(max_length=50)
-    
-    # Operation hours
-    weekday_hours = models.CharField(max_length=50)  # e.g., "08.00 - 17.00"
+    weekday_hours = models.CharField(max_length=50)  
     saturday_hours = models.CharField(max_length=50)
     sunday_hours = models.CharField(max_length=50)
-
-    # Maps coordinates
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
@@ -135,3 +131,19 @@ class ContactInformation(models.Model):
 
     def __str__(self):
         return f"Contact Information - {self.whatsapp_number}"
+    
+#TESTIMONY
+class Testimonial(models.Model):
+    username = models.CharField(max_length=100)
+    message = models.TextField()
+    tagline = models.CharField(max_length=100)  
+    image = models.ImageField(upload_to='testimonials/', null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return f"Testimonial by @{self.username}"
