@@ -16,7 +16,8 @@ api.interceptors.request.use(
   (config) => {
     const token = Cookies.get('token');
     if (token && config.headers) {
-      config.headers.Authorization = `Token ${token}`;
+      // Pastikan format token sesuai dengan yang diharapkan backend
+      config.headers.Authorization = `Token ${token}`; // atau `Bearer ${token}` sesuai kebutuhan
     }
     return config;
   },
@@ -28,13 +29,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear both cookies and localStorage
-      Cookies.remove('token');
-      Cookies.remove('username');
-      Cookies.remove('userType');
-      localStorage.clear();
-      window.location.href = '/admin/login';
+    // Hanya redirect ke login jika error adalah 401 dan bukan dari endpoint login
+    if (error.response?.status === 401 && !error.config.url.includes('login')) {
+      // Cek apakah token masih ada sebelum logout
+      const token = Cookies.get('token');
+      if (!token) {
+        Cookies.remove('token');
+        Cookies.remove('username');
+        Cookies.remove('userType');
+        localStorage.clear();
+        window.location.href = '/admin/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -298,14 +303,17 @@ export const menuService = {
   },
 
   updateProduct: async (id: number, data: FormData) => {
+    const token = Cookies.get('token');
     try {
       const response = await api.put<Product>(`/products/${id}/`, data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Authorization': `Token ${token}`,
+          // Jangan set Content-Type karena FormData akan menetapkannya secara otomatis
         },
       });
       return response.data;
     } catch (error) {
+      console.error('Update product error:', error);
       throw error;
     }
   },

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authService } from '@/services/api';
+import api, { authService } from '@/services/api';
 import Cookies from 'js-cookie';
 
 interface AuthContextType {
@@ -28,20 +28,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkAuth = () => {
-      // Check both localStorage and cookies, prefer cookies for security
       const tokenFromCookie = Cookies.get('token');
-      const tokenFromStorage = localStorage.getItem('token');
       const usernameFromCookie = Cookies.get('username');
       const userTypeFromCookie = Cookies.get('userType');
-
-      const finalToken = tokenFromCookie || tokenFromStorage;
-      
-      if (finalToken && usernameFromCookie) {
-        // Synchronize storage
-        synchronizeAuth(finalToken, usernameFromCookie, userTypeFromCookie || '');
+  
+      if (tokenFromCookie && usernameFromCookie) {
+        // Set token ke axios default headers
+        api.defaults.headers.common['Authorization'] = `Token ${tokenFromCookie}`;
         
-        // Update state
-        setToken(finalToken);
+        setToken(tokenFromCookie);
         setIsAuthenticated(true);
         setUsername(usernameFromCookie);
         setUserType(userTypeFromCookie || null);
@@ -49,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearAuth();
       }
     };
-
+  
     checkAuth();
   }, []);
 
@@ -85,10 +80,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = (newToken: string, username: string, userType: string) => {
-    // Synchronize storage
-    synchronizeAuth(newToken, username, userType);
+    // Set token ke axios default headers
+    api.defaults.headers.common['Authorization'] = `Token ${newToken}`;
     
-    // Update state
+    synchronizeAuth(newToken, username, userType);
     setToken(newToken);
     setIsAuthenticated(true);
     setUsername(username);
@@ -99,24 +94,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const currentToken = token || Cookies.get('token');
       
-      // Clear all auth data first
-      clearAuth();
-      
-      // Call logout API if we had a token
       if (currentToken) {
         try {
           await authService.logout();
         } catch (error) {
           console.error('API logout error:', error);
-          // Continue with logout even if API call fails
         }
       }
       
-      // Redirect to login
+      // Clear auth data
+      clearAuth();
+      
+      // Remove token dari axios headers
+      delete api.defaults.headers.common['Authorization'];
+      
+      // Redirect ke login
       router.push('/login');
     } catch (error) {
       console.error('Logout error:', error);
-      // Ensure we still redirect even if there's an error
       router.push('/login');
     }
   };

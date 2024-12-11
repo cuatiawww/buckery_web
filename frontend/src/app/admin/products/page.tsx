@@ -5,6 +5,9 @@ import React, { useState, useEffect } from 'react';
 import { menuService } from '@/services/api';
 import type { Product, Category } from '@/services/api';
 import Image from 'next/image';
+import router from 'next/router';
+import Cookies from 'js-cookie';
+import axios from 'axios';
 
 export default function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,23 +31,25 @@ export default function ProductManagement() {
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const token = Cookies.get('token');
+    if (!token) {
+      router.push('/admin/login');
+      return;
+    }
+  
+    const fetchInitialData = async () => {
       try {
         setIsLoading(true);
-        const response = await menuService.getAllProducts();
-        console.log('API Response:', response); // Log API response
-        setProducts(response);
+        await Promise.all([fetchProducts(), fetchCategories()]);
       } catch (error) {
-        console.error('Failed to fetch products:', error); // Log error
-        setError('Failed to fetch products');
+        console.error('Failed to fetch initial data:', error);
+        setError('Failed to fetch data');
       } finally {
         setIsLoading(false);
       }
     };
-    
   
-    fetchProducts();
-    fetchCategories();
+    fetchInitialData();
   }, []);
   
 
@@ -71,6 +76,14 @@ export default function ProductManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = Cookies.get('token');
+    
+    if (!token) {
+      setError('Session expired. Please login again.');
+      router.push('/admin/login');
+      return;
+    }
+  
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
@@ -78,7 +91,7 @@ export default function ProductManagement() {
           formDataToSend.append(key, String(value));
         }
       });
-
+  
       if (editingId) {
         await menuService.updateProduct(editingId, formDataToSend);
       } else {
@@ -97,7 +110,12 @@ export default function ProductManagement() {
       });
       fetchProducts();
     } catch (error) {
-      setError(editingId ? 'Failed to update product' : 'Failed to create product');
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setError('Session expired. Please login again.');
+        router.push('/admin/login');
+      } else {
+        setError(editingId ? 'Failed to update product' : 'Failed to create product');
+      }
     }
   };
 

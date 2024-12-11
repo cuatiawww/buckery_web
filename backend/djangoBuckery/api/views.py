@@ -5,8 +5,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from django.db import transaction  # Tambahkan import ini
+from django.db import transaction  
 from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember
 from .serializers import (
     AdminStaffSerializer,
@@ -344,6 +345,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 class ProductViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
@@ -353,6 +358,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = []
         return [permission() for permission in permission_classes]
+    
 
 class TimelineEventViewSet(viewsets.ModelViewSet):
     queryset = TimelineEvent.objects.all()
