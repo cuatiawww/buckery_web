@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { menuService } from '@/services/api';
 import type { Product, Category } from '@/services/api';
+import Image from 'next/image';
 
 export default function ProductManagement() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -20,11 +21,32 @@ export default function ProductManagement() {
     category: 1,
     image: null as File | null,
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formatPrice = (price: any): string => {
+    const numericPrice = parseFloat(price);
+    return !isNaN(numericPrice) ? numericPrice.toFixed(2) : 'Invalid price';
+  };
 
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await menuService.getAllProducts();
+        console.log('API Response:', response); // Log API response
+        setProducts(response);
+      } catch (error) {
+        console.error('Failed to fetch products:', error); // Log error
+        setError('Failed to fetch products');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+  
     fetchProducts();
     fetchCategories();
   }, []);
+  
 
   const fetchProducts = async () => {
     try {
@@ -165,7 +187,11 @@ export default function ProductManagement() {
               <input
                 type="number"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+onChange={(e) => {
+  const value = parseFloat(e.target.value);
+  setFormData({ ...formData, price: isNaN(value) ? 0 : value });
+}}
+
                 className="w-full p-2 border rounded"
                 required
               />
@@ -241,25 +267,29 @@ export default function ProductManagement() {
             {products.map((product) => (
               <tr key={product.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {product.image && (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  )}
-                </td>
+  {product.image && (
+    <Image
+      src={product.image}
+      alt={product.name}
+      className="h-10 w-10 rounded-full object-cover"
+      width={40} // Ukuran lebar
+      height={40} // Ukuran tinggi
+    />
+  )}
+</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{product.name}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  ${product.price.toFixed(2)}
-                </td>
+  {typeof product.price === "number" ? `$${product.price.toFixed(2)}` : "Invalid price"}
+</td>
+
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {product.stock}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {categories.find(c => c.id === product.category)?.name}
+                {categories.find(c => c.id === product.category)?.name || "Unknown Category"}
+
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

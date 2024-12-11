@@ -264,11 +264,16 @@ export const menuService = {
   getAllProducts: async () => {
     try {
       const response = await api.get<Product[]>('/products/');
-      return response.data;
+      const validatedProducts = response.data.map(product => ({
+        ...product,
+        price: typeof product.price === 'number' ? product.price : parseFloat(product.price),
+      }));
+      return validatedProducts;
     } catch (error) {
       throw error;
     }
   },
+  
 
   getProduct: async (id: number) => {
     try {
