@@ -83,7 +83,7 @@ const LoginPage = () => {
                 name="emailUsername"
                 value={formData.emailUsername}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                 required
                 placeholder="Masukkan username Anda"
               />
@@ -99,7 +99,7 @@ const LoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                  className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                   autoComplete="current-password"
                   required
                   placeholder="Masukkan password Anda"
@@ -140,7 +140,7 @@ const LoginPage = () => {
             </button>
 
             <div className="text-center mt-4">
-              <p className="text-sm font-normal">
+              <p className="text-sm font-form">
                 Belum punya akun?{' '}
                 <Link href="/register" className="text-blue-600 hover:text-blue-800 font-semibold">
                   Daftar

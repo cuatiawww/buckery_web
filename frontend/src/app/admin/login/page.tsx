@@ -1,16 +1,18 @@
+// app/admin/login/page.tsx
 'use client';
 
 import React, { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
-import { adminService } from '@/services/api';
+import { authService } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
 const AdminLoginPage = () => {
   const router = useRouter();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     emailUsername: '',
     password: '',
@@ -19,18 +21,31 @@ const AdminLoginPage = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
+    
     try {
-      const response = await adminService.login(formData);
+      const response = await authService.adminStaffLogin(formData);
+      
+      // Verify that the user is an admin or staff
+      if (!['ADMIN', 'STAFF'].includes(response.user_type)) {
+        setError('Access denied. This login is only for admin and staff.');
+        return;
+      }
+
       if (response.token) {
         login(response.token, response.username, response.user_type);
-        router.push('/admin/dashboard'); // Redirect to admin dashboard
+        // Redirect to admin dashboard
+        router.push('/admin/dashboard');
       }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.data?.message) {
-        alert(error.response.data.message);
+        setError(error.response.data.message);
+      } else if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors).flat();
+        setError(errorMessages.join('\n'));
       } else {
-        alert('Login failed. Please check your credentials.');
+        setError('Login failed. Please check your credentials.');
       }
     }
   };
@@ -52,11 +67,17 @@ const AdminLoginPage = () => {
       </div>
 
       {/* Right side - Form */}
-      <div className="w-full md:w-1/2 bg-primary p-8 flex flex-col justify-center">
+      <div className="w-full md:w-1/2 bg-primary p-8 flex flex-col justify-center ">
         <div className="max-w-md mx-auto w-full">
           <h2 className="text-3xl font-bold mb-8 text-center">ADMIN LOGIN</h2>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              {error}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} className="space-y-6 ">
             <div>
               <label className="block text-sm font-semibold mb-2">
                 Username
@@ -66,7 +87,7 @@ const AdminLoginPage = () => {
                 name="emailUsername"
                 value={formData.emailUsername}
                 onChange={(e) => setFormData({ ...formData, emailUsername: e.target.value })}
-                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                 required
                 placeholder="Enter your username"
               />
@@ -82,7 +103,7 @@ const AdminLoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                  className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                   required
                   placeholder="Enter your password"
                 />

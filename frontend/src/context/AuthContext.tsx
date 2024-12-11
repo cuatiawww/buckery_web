@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { authService } from '@/services/api';
 import Cookies from 'js-cookie';
 
-
 interface AuthContextType {
   isAuthenticated: boolean;
   username: string | null;
   userType: string | null;
+  token: string | null;
   setIsAuthenticated: (value: boolean) => void;
   setUsername: (value: string | null) => void;
   setUserType: (value: string | null) => void;
@@ -24,26 +24,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      const savedUsername = localStorage.getItem('username');
-      const savedUserType = localStorage.getItem('userType');
+      // Check both localStorage and cookies, prefer cookies for security
+      const tokenFromCookie = Cookies.get('token');
+      const tokenFromStorage = localStorage.getItem('token');
+      const usernameFromCookie = Cookies.get('username');
+      const userTypeFromCookie = Cookies.get('userType');
+
+      const finalToken = tokenFromCookie || tokenFromStorage;
       
-      if (token && savedUsername) {
-        // Set both localStorage and cookies
-        localStorage.setItem('token', token);
-        localStorage.setItem('username', savedUsername);
-        localStorage.setItem('userType', savedUserType || '');
+      if (finalToken && usernameFromCookie) {
+        // Synchronize storage
+        synchronizeAuth(finalToken, usernameFromCookie, userTypeFromCookie || '');
         
-        Cookies.set('token', token);
-        Cookies.set('username', savedUsername);
-        Cookies.set('userType', savedUserType || '');
-        
+        // Update state
+        setToken(finalToken);
         setIsAuthenticated(true);
-        setUsername(savedUsername);
-        setUserType(savedUserType);
+        setUsername(usernameFromCookie);
+        setUserType(userTypeFromCookie || null);
       } else {
         clearAuth();
       }
@@ -52,36 +53,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
+  const synchronizeAuth = (token: string, username: string, userType: string) => {
+    // Set cookies (primary storage)
+    Cookies.set('token', token, { secure: true, sameSite: 'strict' });
+    Cookies.set('username', username, { secure: true, sameSite: 'strict' });
+    Cookies.set('userType', userType, { secure: true, sameSite: 'strict' });
+    
+    // Set localStorage (backup)
+    localStorage.setItem('token', token);
+    localStorage.setItem('username', username);
+    localStorage.setItem('userType', userType);
+  };
+
   const clearAuth = () => {
+    // Clear cookies
+    Cookies.remove('token');
+    Cookies.remove('username');
+    Cookies.remove('userType');
+    
     // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('userType');
     localStorage.removeItem('rememberMe');
     
-    // Clear cookies
-    Cookies.remove('token');
-    Cookies.remove('username');
-    Cookies.remove('userType');
-    
     // Clear state
+    setToken(null);
     setIsAuthenticated(false);
     setUsername(null);
     setUserType(null);
   };
 
-  const login = (token: string, username: string, userType: string) => {
-    // Set localStorage
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', username);
-    localStorage.setItem('userType', userType);
-    
-    // Set cookies
-    Cookies.set('token', token);
-    Cookies.set('username', username);
-    Cookies.set('userType', userType);
+  const login = (newToken: string, username: string, userType: string) => {
+    // Synchronize storage
+    synchronizeAuth(newToken, username, userType);
     
     // Update state
+    setToken(newToken);
     setIsAuthenticated(true);
     setUsername(username);
     setUserType(userType);
@@ -89,34 +97,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      // Get token before clearing storage
-      const token = localStorage.getItem('token');
+      const currentToken = token || Cookies.get('token');
       
-      // Clear storage first
-      localStorage.removeItem('token');
-      localStorage.removeItem('username');
-      localStorage.removeItem('userType');
-      localStorage.removeItem('rememberMe');
+      // Clear all auth data first
+      clearAuth();
       
-      // Update state
-      setIsAuthenticated(false);
-      setUsername(null);
-      setUserType(null);
-      
-      // Only try to call API if we had a token
-      if (token) {
+      // Call logout API if we had a token
+      if (currentToken) {
         try {
           await authService.logout();
         } catch (error) {
           console.error('API logout error:', error);
-          // Ignore API errors since we've already cleared local state
+          // Continue with logout even if API call fails
         }
       }
       
-      // Always redirect
+      // Redirect to login
       router.push('/login');
     } catch (error) {
       console.error('Logout error:', error);
+      // Ensure we still redirect even if there's an error
       router.push('/login');
     }
   };
@@ -125,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated,
     username,
     userType,
+    token, // Expose token through context
     setIsAuthenticated,
     setUsername,
     setUserType,

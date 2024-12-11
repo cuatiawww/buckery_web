@@ -88,7 +88,7 @@ const RegisterPage = () => {
                 name="nama_lengkap"
                 value={formData.nama_lengkap}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                 required
               />
             </div>
@@ -102,7 +102,7 @@ const RegisterPage = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                 required
               />
             </div>
@@ -116,7 +116,7 @@ const RegisterPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                 required
               />
             </div>
@@ -131,7 +131,7 @@ const RegisterPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-normal"
+                  className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                   autoComplete="new-password"
                   required
                 />

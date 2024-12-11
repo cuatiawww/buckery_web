@@ -102,13 +102,15 @@ def user_register(request):
 def register_staff(request):
     """Create new staff account (admin only)"""
     try:
-        # Set user typ to STAFF
         data = request.data.copy()
         data['user_type'] = 'STAFF'
         
         serializer = AdminStaffSerializer(data=data)
         if serializer.is_valid():
             user = serializer.save()
+            # Pastikan user dianggap sebagai staf oleh Django
+            user.is_staff = True
+            user.save()
             
             return Response({
                 'status': 'success',
@@ -176,37 +178,31 @@ def admin_staff_login(request):
             'message': str(e)
         }, status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser])  # Restrict access to admin only
 def create_staff(request):
-    """Create new staff account (admin only)"""
+    """Create new staff or admin account."""
     try:
-        data = request.data.copy()
-        data['user_type'] = 'STAFF'
-        
-        serializer = AdminStaffSerializer(data=data)
+        serializer = AdminStaffSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            user.is_staff = True
-            user.save()
-            
             return Response({
                 'status': 'success',
-                'message': 'Staff account created successfully',
+                'message': 'User account created successfully',
                 'data': {
+                    'id': user.id,
                     'username': user.username,
                     'email': user.email,
                     'nama_lengkap': user.nama_lengkap,
                     'user_type': user.user_type
                 }
             }, status=status.HTTP_201_CREATED)
-        
-        return Response({
-            'status': 'error',
-            'errors': serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-        
+        else:
+            return Response({
+                'status': 'error',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        logger.error(f"Error creating staff account: {str(e)}")
+        logger.error(f"Error creating user: {e}")
         return Response({
             'status': 'error',
             'message': str(e)
@@ -214,6 +210,38 @@ def create_staff(request):
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
+def list_users(request):
+    """List all users with filtering by user_type."""
+    try:
+        user_type = request.query_params.get('user_type', None)  # Filter by user_type
+        if user_type:
+            users = CustomUser.objects.filter(user_type=user_type)
+        else:
+            users = CustomUser.objects.all()
+
+        data = [
+            {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'nama_lengkap': user.nama_lengkap,
+                'user_type': user.user_type
+            }
+            for user in users
+        ]
+        return Response({
+            'status': 'success',
+            'data': data
+        }, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error listing users: {e}")
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@api_view(['GET'])  # Tambahkan ini
+@permission_classes([IsAdminUser])  # Tambahkan ini
 def list_staff(request):
     """Get list of all staff members (admin only)"""
     try:
@@ -239,7 +267,6 @@ def list_staff(request):
             'status': 'error',
             'message': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def update_staff(request, staff_id):

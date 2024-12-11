@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // services/api.ts
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
@@ -11,21 +12,30 @@ const api = axios.create({
     'Accept': 'application/json'
   }
 });
-
-// Request interceptor untuk menambahkan token ke header
 api.interceptors.request.use(
   (config) => {
-    // Get the token from localStorage
-    const token = localStorage.getItem('token');
-    
-    // If token exists, add it to the headers
+    const token = Cookies.get('token');
     if (token && config.headers) {
       config.headers.Authorization = `Token ${token}`;
     }
-    
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear both cookies and localStorage
+      Cookies.remove('token');
+      Cookies.remove('username');
+      Cookies.remove('userType');
+      localStorage.clear();
+      window.location.href = '/admin/login';
+    }
     return Promise.reject(error);
   }
 );
@@ -57,10 +67,13 @@ export interface FormDataRegister {
   password: string;
 }
 export interface StaffData {
+  id?: number;
   username: string;
-  password: string;
   email: string;
+  password?: string;
   nama_lengkap: string;
+  user_type: string; 
+  is_active?: boolean;
 }
 
 export interface Product {
@@ -69,9 +82,12 @@ export interface Product {
   price: number;
   description: string;
   stock: number;
-  image: string;
+  image: string | null;
   category: number;
+  is_active: boolean;
+  created_at: string;
 }
+
 export interface LoginResponse {
   status: string;
   token: string;
@@ -137,36 +153,13 @@ export interface TimelineEvent {
 export const authService = {
   userLogin: async (formData: FormDataLogin) => {
     try {
-      // Log the request data for debugging
-      console.log('Login request data:', {
+      const response = await api.post<LoginResponse>('/auth/user-login/', {
         username: formData.emailUsername,
         password: formData.password
       });
-
-      const response = await api.post('/auth/user-login/', {
-        username: formData.emailUsername,
-        password: formData.password
-      });
-      
-      console.log('Login response:', response.data); // Debug log
-
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('username', response.data.username);
-        localStorage.setItem('userType', response.data.user_type);
-        if (formData.rememberMe) {
-          localStorage.setItem('rememberMe', 'true');
-        }
-      }
-      
       return response.data;
-    } catch (error: any) {
-      // Enhanced error logging
-      console.error('Login error details:', {
-        response: error.response?.data,
-        status: error.response?.status,
-        message: error.message
-      });
+    } catch (error) {
+      console.error('Login error:', error);
       throw error;
     }
   },
@@ -175,28 +168,20 @@ export const authService = {
     try {
       const response = await api.post('/auth/user-register/', formData);
       return response.data;
-    } catch (error: any) {
-      console.error('Registration error:', error.response?.data);
+    } catch (error) {
+      console.error('Registration error:', error);
       throw error;
     }
   },
 
   adminStaffLogin: async (formData: FormDataLogin) => {
     try {
-      const response = await api.post<LoginResponse>('/auth/admin-login/', {
+      const response = await api.post('/auth/admin-login/', {
         username: formData.emailUsername,
         password: formData.password
       });
       
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('username', response.data.username);
-        localStorage.setItem('userType', response.data.user_type);
-        if (formData.rememberMe) {
-          localStorage.setItem('rememberMe', 'true');
-        }
-      }
-      
+      // Hapus penyimpanan token di sini karena akan ditangani oleh AuthContext
       return response.data;
     } catch (error) {
       console.error('Admin login error:', error);
@@ -206,24 +191,10 @@ export const authService = {
 
   logout: async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        return; // No need to call API if there's no token
-      }
-
       await api.post('/auth/logout/');
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
-      // Always clear storage
-      localStorage.clear();
     }
-
-    // Always clear storage
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('rememberMe');
   }
 };
 
@@ -251,52 +222,92 @@ export const adminService = {
       throw error;
     }
   },
-
-  createStaff: async (staffData: StaffData) => {
-    try {
-      const response = await api.post('/auth/staff/create/', staffData);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating staff:', error);
-      throw error;
-    }
-  },
-
   listStaff: async () => {
     try {
-      const token = localStorage.getItem('token');
-      console.log('Using token:', token); // Debug log
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await api.get('/auth/staff/list/');
-      console.log('Staff list response:', response.data); // Debug log
+      const response = await api.get('/auth/staff/list/'); // Hapus /api
       return response.data;
     } catch (error) {
       console.error('Error fetching staff list:', error);
       throw error;
     }
-  },
+},
 
-  updateStaff: async (staffId: number, data: Partial<StaffData>) => {
+createStaff: async (data: {
+  username: string;
+  email: string;
+  password: string;
+  nama_lengkap: string;
+  user_type: string;
+}) => {
+  try {
+    const response = await api.post('/auth/staff/create/', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating staff:', error);
+    throw error;
+  }
+},
+
+updateStaff: async (staffId: number, data: Partial<StaffData>) => {
     try {
-      const response = await api.post(`/auth/staff/update/${staffId}/`, data);
+      const response = await api.post(`/auth/staff/update/${staffId}/`, data); // Hapus /api
       return response.data;
     } catch (error) {
       console.error('Error updating staff:', error);
       throw error;
     }
-  }
+}
 };
 
 // Menu services
 export const menuService = {
   getAllProducts: async () => {
     try {
-      const response = await api.get('/products/');
+      const response = await api.get<Product[]>('/products/');
       return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getProduct: async (id: number) => {
+    try {
+      const response = await api.get<Product>(`/products/${id}/`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createProduct: async (data: FormData) => {
+    try {
+      const response = await api.post<Product>('/products/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateProduct: async (id: number, data: FormData) => {
+    try {
+      const response = await api.put<Product>(`/products/${id}/`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteProduct: async (id: number) => {
+    try {
+      await api.delete(`/products/${id}/`);
     } catch (error) {
       throw error;
     }
@@ -304,22 +315,14 @@ export const menuService = {
 
   getAllCategories: async () => {
     try {
-      const response = await api.get('/categories/');
+      const response = await api.get<Category[]>('/categories/');
       return response.data;
     } catch (error) {
       throw error;
     }
   },
-
-  getProductsByCategory: async (categoryId: number) => {
-    try {
-      const response = await api.get(`/products/?category=${categoryId}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
 };
+
 
 // About Services
 export const aboutService = {
@@ -348,7 +351,43 @@ export const aboutService = {
       } catch (error) {
         throw error;
       }
-    }
+    },
+    createTeamMember: async (data: FormData) => {
+      try {
+        const response = await api.post<TeamMember>('/team-members/', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error creating team member:', error);
+        throw error;
+      }
+    },
+  
+    updateTeamMember: async (id: number, data: FormData) => {
+      try {
+        const response = await api.put<TeamMember>(`/team-members/${id}/`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error updating team member:', error);
+        throw error;
+      }
+    },
+  
+    deleteTeamMember: async (id: number) => {
+      try {
+        await api.delete(`/team-members/${id}/`);
+      } catch (error) {
+        console.error('Error deleting team member:', error);
+        throw error;
+      }
+    },
   };
 
   // CONTACT INFO
@@ -400,7 +439,7 @@ export const aboutService = {
         throw error;
       }
     },
-  
+    
     createTestimonial: async (data: FormData) => {
       try {
         const response = await api.post<Testimonial>('/testimonials/', data, {
@@ -414,7 +453,7 @@ export const aboutService = {
         throw error;
       }
     },
-  
+    
     updateTestimonial: async (id: number, data: FormData) => {
       try {
         const response = await api.put<Testimonial>(`/testimonials/${id}/`, data, {
@@ -429,6 +468,18 @@ export const aboutService = {
       }
     },
   
+    toggleStatus: async (id: number, isActive: boolean) => {
+      try {
+        const response = await api.patch<Testimonial>(`/testimonials/${id}/`, {
+          is_active: isActive
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error toggling testimonial status:', error);
+        throw error;
+      }
+    },
+    
     deleteTestimonial: async (id: number) => {
       try {
         await api.delete(`/testimonials/${id}/`);

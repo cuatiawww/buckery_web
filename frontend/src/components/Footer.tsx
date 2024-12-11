@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Instagram, Mail, Phone, MapPin, Clock } from 'lucide-react';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
@@ -94,11 +95,14 @@ const Footer = () => {
           </div>
 
           {/* Copyright Section */}
-          <div className="mt-16 pt-8 border-t border-gray-800 text-center">
-            <p className="text-gray-400 font-ChickenSoup">
-              © 2024 Buckery. All rights reserved | #LembutnyaMagis
-            </p>
-          </div>
+<div className="mt-16 pt-8 border-t border-gray-800 text-center">
+  <Link 
+    href="/admin/login" 
+    className="text-gray-400 hover:text-gray-400 font-ChickenSoup cursor-default"
+  >
+    © 2024 Buckery. All rights reserved | #LembutnyaMagis
+  </Link>
+</div>
         </div>
       </footer>
     </div>

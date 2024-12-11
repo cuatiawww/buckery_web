@@ -17,6 +17,7 @@ const config: Config = {
       fontFamily: {
         beachday: ["var(--font-beachday)"],
         ChickenSoup: ["var(--font-ChickenSoup)"],
+        form: ["Arial", "Helvetica", "system-ui", "sans-serif"], // New font family for forms
       },
     },
   },

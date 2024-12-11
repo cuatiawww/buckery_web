@@ -1,19 +1,21 @@
+// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Get the path
-  const path = request.nextUrl.pathname;
+  const token = request.cookies.get('token');
+  const userType = request.cookies.get('userType');
 
-  // Check if it's an admin route
-  if (path.startsWith('/admin') && path !== '/admin/login') {
-    // Get the token from localStorage
-    const token = request.cookies.get('token')?.value;
-    const userType = request.cookies.get('userType')?.value;
-
-    // If no token or not admin, redirect to login
-    if (!token || userType !== 'ADMIN') {
+  // Jika mengakses halaman admin
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    // Jika bukan halaman login admin dan tidak ada token
+    if (!request.nextUrl.pathname.includes('/admin/login') && !token) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+
+    // Jika ada token tapi bukan ADMIN atau STAFF
+    if (token && userType?.value && !['ADMIN', 'STAFF'].includes(userType.value)) {
+      return NextResponse.redirect(new URL('/login', request.url));
     }
   }
 
@@ -21,5 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/admin/:path*',
+  matcher: ['/admin/:path*']
 };
