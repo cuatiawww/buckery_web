@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember
+from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember, UserProfile
 
 # CATEGORY
 
@@ -14,7 +14,10 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['id', 'name', 'price', 'description', 'stock', 'image', 'category', 'created_at']
+        
+    def create(self, validated_data):
+        return Product.objects.create(**validated_data)
 
 # TENTANG KAMI
 
@@ -29,6 +32,32 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'role', 'quote', 'image', 'member_type', 'order']
 
 # USER, ADMIN, STAFF
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    nama_lengkap = serializers.CharField(source='user.nama_lengkap', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'username',
+            'email', 
+            'nama_lengkap',
+            'phone',
+            'address',
+            'notes',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def update(self, instance, validated_data):
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.address = validated_data.get('address', instance.address)
+        instance.notes = validated_data.get('notes', instance.notes)
+        instance.save()
+        return instance
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
@@ -131,3 +160,16 @@ class TestimonialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Testimonial
         fields = ['id', 'username', 'message', 'tagline', 'image', 'is_active', 'order', 'created_at']
+        
+    def create(self, validated_data):
+        return Testimonial.objects.create(**validated_data)
+        
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.message = validated_data.get('message', instance.message)
+        instance.tagline = validated_data.get('tagline', instance.tagline)
+        instance.image = validated_data.get('image', instance.image)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.order = validated_data.get('order', instance.order)
+        instance.save()
+        return instance

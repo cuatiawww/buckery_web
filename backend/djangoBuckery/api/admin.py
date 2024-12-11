@@ -7,7 +7,8 @@ from .models import (
     TimelineEvent, 
     TeamMember,
     ContactInformation,
-    Testimonial 
+    Testimonial,
+    UserProfile 
 )
 
 class CustomUserAdmin(UserAdmin):
@@ -27,6 +28,7 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ('username', 'email', 'nama_lengkap')
     ordering = ('username',)
+    
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -67,3 +69,10 @@ class TestimonialAdmin(admin.ModelAdmin):
 
 # Register CustomUser
 admin.site.register(CustomUser, CustomUserAdmin)
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone', 'created_at', 'updated_at')
+    search_fields = ('user__username', 'user__email', 'phone', 'address')
+    list_filter = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at')

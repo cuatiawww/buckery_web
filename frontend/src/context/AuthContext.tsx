@@ -10,6 +10,7 @@ interface AuthContextType {
   username: string | null;
   userType: string | null;
   token: string | null;
+  isLoading: boolean;
   setIsAuthenticated: (value: boolean) => void;
   setUsername: (value: string | null) => void;
   setUserType: (value: string | null) => void;
@@ -25,64 +26,80 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const tokenFromCookie = Cookies.get('token');
-      const usernameFromCookie = Cookies.get('username');
-      const userTypeFromCookie = Cookies.get('userType');
-  
-      if (tokenFromCookie && usernameFromCookie) {
-        // Set token ke axios default headers
-        api.defaults.headers.common['Authorization'] = `Token ${tokenFromCookie}`;
-        
-        setToken(tokenFromCookie);
-        setIsAuthenticated(true);
-        setUsername(usernameFromCookie);
-        setUserType(userTypeFromCookie || null);
-      } else {
+    const checkAuth = async () => {
+      setIsLoading(true);
+      try {
+        const tokenFromCookie = Cookies.get('token');
+        console.log('Token from cookie:', tokenFromCookie); // Debug log
+
+        if (tokenFromCookie) {
+          // Set token in axios headers
+          api.defaults.headers.common['Authorization'] = `Token ${tokenFromCookie}`;
+          
+          // Try to fetch profile to validate token
+          try {
+            await api.get('/user/profile/');
+            // If successful, set auth state
+            setToken(tokenFromCookie);
+            setIsAuthenticated(true);
+            setUsername(Cookies.get('username') || null);
+            setUserType(Cookies.get('userType') || null);
+          } catch (error) {
+            console.error('Token validation failed:', error);
+            clearAuth();
+          }
+        } else {
+          clearAuth();
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
         clearAuth();
+      } finally {
+        setIsLoading(false);
       }
     };
-  
+
     checkAuth();
   }, []);
 
+
   const synchronizeAuth = (token: string, username: string, userType: string) => {
-    // Set cookies (primary storage)
-    Cookies.set('token', token, { secure: true, sameSite: 'strict' });
-    Cookies.set('username', username, { secure: true, sameSite: 'strict' });
-    Cookies.set('userType', userType, { secure: true, sameSite: 'strict' });
+    // Set cookies dengan opsi yang benar
+    const cookieOptions: Cookies.CookieAttributes = { 
+      secure: true, 
+      sameSite: 'Strict', // Perhatikan 'S' kapital
+      expires: 7 
+    };
     
-    // Set localStorage (backup)
+    Cookies.set('token', token, cookieOptions);
+    Cookies.set('username', username, cookieOptions);
+    Cookies.set('userType', userType, cookieOptions);
+    
+    // Set localStorage sebagai backup
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
     localStorage.setItem('userType', userType);
-  };
 
-  const clearAuth = () => {
-    // Clear cookies
-    Cookies.remove('token');
-    Cookies.remove('username');
-    Cookies.remove('userType');
-    
-    // Clear localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('userType');
-    localStorage.removeItem('rememberMe');
-    
-    // Clear state
-    setToken(null);
-    setIsAuthenticated(false);
-    setUsername(null);
-    setUserType(null);
-  };
+    // Set axios default header
+    api.defaults.headers.common['Authorization'] = `Token ${token}`;
+};
+
+const clearAuth = () => {
+  delete api.defaults.headers.common['Authorization'];
+  Cookies.remove('token');
+  Cookies.remove('username');
+  Cookies.remove('userType');
+  localStorage.clear();
+  setToken(null);
+  setIsAuthenticated(false);
+  setUsername(null);
+  setUserType(null);
+};
 
   const login = (newToken: string, username: string, userType: string) => {
-    // Set token ke axios default headers
-    api.defaults.headers.common['Authorization'] = `Token ${newToken}`;
-    
     synchronizeAuth(newToken, username, userType);
     setToken(newToken);
     setIsAuthenticated(true);
@@ -90,9 +107,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUserType(userType);
   };
 
+  // const logout = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const currentToken = token || Cookies.get('token');
+      
+  //     if (currentToken) {
+  //       try {
+  //         await authService.logout();
+  //       } catch (error) {
+  //         console.error('API logout error:', error);
+  //       }
+  //     }
+      
+  //     clearAuth();
+  //     router.push('/login');
+  //   } catch (error) {
+  //     console.error('Logout error:', error);
+  //     clearAuth();
+  //     router.push('/login');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const logout = async () => {
+    setIsLoading(true);
     try {
       const currentToken = token || Cookies.get('token');
+      const currentUserType = userType || Cookies.get('userType');
       
       if (currentToken) {
         try {
@@ -102,31 +145,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       
-      // Clear auth data
       clearAuth();
-      
-      // Remove token dari axios headers
-      delete api.defaults.headers.common['Authorization'];
-      
-      // Redirect ke login
-      router.push('/login');
+      // Arahkan ke halaman yang berbeda berdasarkan userType
+      if (currentUserType === 'ADMIN' || currentUserType === 'STAFF') {
+        router.push('/admin/login');
+      } else {
+        router.push('/login');
+      }
     } catch (error) {
       console.error('Logout error:', error);
+      clearAuth();
       router.push('/login');
+    } finally {
+      setIsLoading(false);
     }
   };
-
+    
   const value = {
     isAuthenticated,
     username,
     userType,
-    token, // Expose token through context
+    token,
+    isLoading,
     setIsAuthenticated,
     setUsername,
     setUserType,
     login,
     logout
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={value}>

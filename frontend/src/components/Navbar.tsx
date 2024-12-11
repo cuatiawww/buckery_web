@@ -1,6 +1,5 @@
 "use client";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -17,22 +16,27 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { itemCount } = useCart();
   const { isAuthenticated, username, logout: authLogout } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const isActive = (path: string) => pathname === path;
 
   const handleLogout = async () => {
     try {
       await authService.logout();
-      authLogout(); // Use renamed logout function from context
+      authLogout();
       setIsDropdownOpen(false);
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
-      // Still logout locally
       authLogout();
       router.push('/login');
     }
   };
+
   const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
     <Link
       href={href}
@@ -44,7 +48,6 @@ const Navbar = () => {
       {children}
     </Link>
   );
-
 
   return (
     <>
@@ -79,7 +82,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <Link href="/keranjang" className="px-2 py-2 text-sm font-medium bg-tertiary border-4 border-black text-black rounded-xl hover:bg-primary transition-colors relative">
               <ShoppingCart className="w-5 h-5" strokeWidth={3} />
-              {itemCount > 0 && (
+              {isClient && itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {itemCount}
                 </span>
@@ -97,9 +100,22 @@ const Navbar = () => {
                     <div className="p-2 border-b border-black">
                       <span className="text-sm font-medium">{username}</span>
                     </div>
-                    <button onClick={handleLogout} className="w-full p-2 flex items-center space-x-2 text-red-600 hover:bg-gray-50 rounded-b-lg">
+                    <Link 
+                      href="/profile" 
+                      className="block w-full p-2 text-left hover:bg-gray-50"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        <span>Profil</span>
+                      </div>
+                    </Link>
+                    <button 
+                      onClick={handleLogout} 
+                      className="w-full p-2 flex items-center space-x-2 text-red-600 hover:bg-gray-50 rounded-b-lg"
+                    >
                       <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
+                      <span>Keluar</span>
                     </button>
                   </div>
                 )}

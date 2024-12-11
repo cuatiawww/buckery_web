@@ -13,7 +13,8 @@ from .views import (
     create_staff,
     list_staff,
     update_staff,
-    logout_view
+    logout_view,
+    user_profile 
 )
 
 router = DefaultRouter()
@@ -22,7 +23,7 @@ router.register('products', ProductViewSet, basename='product')
 router.register('timeline-events', TimelineEventViewSet, basename='timeline-event')
 router.register('team-members', TeamMemberViewSet, basename='team-member')
 router.register('contact-info', ContactInformationViewSet, basename='contact-info')
-router.register('testimonials', TestimonialViewSet, basename='testimonial')  
+router.register('testimonials', TestimonialViewSet, basename='testimonial')
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -44,4 +45,7 @@ urlpatterns = [
         
         path('logout/', logout_view, name='logout'),
     ])),
+
+    # Tambahkan endpoint untuk user profile
+    path('user/profile/', user_profile, name='user-profile'),
 ]

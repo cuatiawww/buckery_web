@@ -5,14 +5,16 @@ import React, { useState, useEffect } from 'react';
 import { menuService } from '@/services/api';
 import type { Product, Category } from '@/services/api';
 import Image from 'next/image';
-import router from 'next/router';
+import { useRouter } from 'next/navigation';  // Ubah ini
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
 export default function ProductManagement() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -24,33 +26,36 @@ export default function ProductManagement() {
     category: 1,
     image: null as File | null,
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const formatPrice = (price: any): string => {
-    const numericPrice = parseFloat(price);
-    return !isNaN(numericPrice) ? numericPrice.toFixed(2) : 'Invalid price';
-  };
 
+  // Gabungkan fetch data dalam satu useEffect
   useEffect(() => {
-    const token = Cookies.get('token');
-    if (!token) {
-      router.push('/admin/login');
-      return;
-    }
-  
     const fetchInitialData = async () => {
+      const token = Cookies.get('token');
+      if (!token) {
+        router.push('/admin/login');
+        return;
+      }
+      
+      setIsAuthenticated(true);
+      
       try {
         setIsLoading(true);
-        await Promise.all([fetchProducts(), fetchCategories()]);
+        const [productsData, categoriesData] = await Promise.all([
+          menuService.getAllProducts(),
+          menuService.getAllCategories()
+        ]);
+        setProducts(productsData);
+        setCategories(categoriesData);
       } catch (error) {
-        console.error('Failed to fetch initial data:', error);
         setError('Failed to fetch data');
+        console.error('Fetch error:', error);
       } finally {
         setIsLoading(false);
       }
     };
-  
+
     fetchInitialData();
-  }, []);
+  }, [router]);
   
 
   const fetchProducts = async () => {
@@ -73,24 +78,41 @@ export default function ProductManagement() {
       setError('Failed to fetch categories');
     }
   };
-
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData({ ...formData, image: file });
+  };
+  // In page.tsx, update the handleSubmit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = Cookies.get('token');
     
-    if (!token) {
-      setError('Session expired. Please login again.');
+    if (!isAuthenticated) {
+      setError('Not authenticated. Please login.');
       router.push('/admin/login');
       return;
     }
   
     try {
       const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== null) {
-          formDataToSend.append(key, String(value));
-        }
-      });
+      
+      // Add form fields
+      formDataToSend.append('name', formData.name.trim());
+      formDataToSend.append('price', formData.price.toString());
+      formDataToSend.append('description', formData.description.trim());
+      formDataToSend.append('stock', formData.stock.toString());
+      formDataToSend.append('category', formData.category.toString());
+      formDataToSend.append('is_active', 'true');  // Set default is_active value
+      
+      // Handle image
+      if (formData.image instanceof File) {
+        formDataToSend.append('image', formData.image);
+      }
+  
+      console.log('Submitting form data...');
+      // Log FormData contents for debugging
+      for (const [key, value] of formDataToSend.entries()) {
+        console.log(`${key}:`, value);
+      }
   
       if (editingId) {
         await menuService.updateProduct(editingId, formDataToSend);
@@ -98,6 +120,7 @@ export default function ProductManagement() {
         await menuService.createProduct(formDataToSend);
       }
       
+      // Reset form after successful submission
       setShowAddForm(false);
       setEditingId(null);
       setFormData({
@@ -108,16 +131,30 @@ export default function ProductManagement() {
         category: 1,
         image: null,
       });
-      fetchProducts();
+      await fetchProducts();
+      
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        setError('Session expired. Please login again.');
-        router.push('/admin/login');
+      console.error('Form submission error:', error);
+      
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          setError('Session expired. Please login again.');
+          Cookies.remove('token');
+          router.push('/admin/login');
+        } else {
+          setError(
+            error.response?.data?.detail || 
+            error.response?.data?.error || 
+            'Failed to create product'
+          );
+        }
       } else {
-        setError(editingId ? 'Failed to update product' : 'Failed to create product');
+        setError('An unexpected error occurred');
       }
     }
   };
+
+  
 
   const handleEdit = (product: Product) => {
     setFormData({
@@ -252,11 +289,11 @@ onChange={(e) => {
             <div className="col-span-2">
               <label className="block mb-1">Image</label>
               <input
-                type="file"
-                onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })}
-                className="w-full p-2 border rounded"
-                accept="image/*"
-              />
+    type="file"
+    onChange={handleImageChange}
+    className="w-full p-2 border rounded"
+    accept="image/*"
+  />
             </div>
           </div>
           <button

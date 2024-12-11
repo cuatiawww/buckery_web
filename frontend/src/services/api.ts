@@ -15,9 +15,12 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = Cookies.get('token');
-    if (token && config.headers) {
-      // Pastikan format token sesuai dengan yang diharapkan backend
-      config.headers.Authorization = `Token ${token}`; // atau `Bearer ${token}` sesuai kebutuhan
+    if (token) {
+      config.headers.Authorization = `Token ${token}`;
+    }
+    // Jangan set Content-Type untuk request dengan FormData
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
     return config;
   },
@@ -153,7 +156,60 @@ export interface TimelineEvent {
     created_at: string;
   }
 
+  export interface UserProfile {
+    username: string;
+    email: string;
+    nama_lengkap: string;
+    phone: string;
+    address: string;
+    notes: string;
+    created_at: string;
+    updated_at: string;
+  }
 
+
+  // USER SERVICE
+
+  export const userService = {
+    getProfile: async () => {
+      try {
+        // Check token before making request
+        const token = Cookies.get('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+  
+        const response = await api.get<UserProfile>('/user/profile/', {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        throw error;
+      }
+    },
+  
+    updateProfile: async (data: Partial<UserProfile>) => {
+      try {
+        const token = Cookies.get('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+  
+        const response = await api.put<UserProfile>('/user/profile/', data, {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+      }
+    }
+  };
 // Auth services
 export const authService = {
   userLogin: async (formData: FormDataLogin) => {
@@ -290,14 +346,32 @@ export const menuService = {
   },
 
   createProduct: async (data: FormData) => {
+    const token = Cookies.get('token');
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
     try {
+      // Log token untuk debugging
+      console.log('Using token:', token);
+      
       const response = await api.post<Product>('/products/', data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          Authorization: `Token ${token}`
+        }
       });
       return response.data;
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          // Handle token expiration
+          Cookies.remove('token');
+          window.location.href = '/admin/login';
+          throw new Error('Session expired. Please login again.');
+        }
+        console.error('Create product error:', error.response?.data);
+        throw error;
+      }
       throw error;
     }
   },
@@ -415,6 +489,58 @@ export const aboutService = {
       }
     },
   
+    createContactInfo: async (data: Partial<ContactInfo>) => {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+  
+      try {
+        const response = await api.post<ContactInfo>('/contact-info/', data, {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            Cookies.remove('token');
+            window.location.href = '/admin/login';
+            throw new Error('Session expired. Please login again.');
+          }
+          throw new Error(error.response?.data?.error || 'Failed to create contact information');
+        }
+        throw error;
+      }
+    },
+  
+    updateContactInfo: async (id: number, data: Partial<ContactInfo>) => {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+  
+      try {
+        const response = await api.put<ContactInfo>(`/contact-info/${id}/`, data, {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            Cookies.remove('token');
+            window.location.href = '/admin/login';
+            throw new Error('Session expired. Please login again.');
+          }
+          throw new Error(error.response?.data?.error || 'Failed to update contact information');
+        }
+        throw error;
+      }
+    },
+  
     sendWhatsAppMessage: (data: {
       name: string;
       email: string;
@@ -445,7 +571,15 @@ export const aboutService = {
   export const testimonialService = {
     getAllTestimonials: async () => {
       try {
-        const response = await api.get<Testimonial[]>('/testimonials/');
+        // Cek token untuk menentukan header
+        const token = Cookies.get('token');
+        const headers = token ? {
+          'Authorization': `Token ${token}`
+        } : undefined;
+  
+        const response = await api.get<Testimonial[]>('/testimonials/', {
+          headers
+        });
         return response.data;
       } catch (error) {
         console.error('Error fetching testimonials:', error);
@@ -453,51 +587,109 @@ export const aboutService = {
       }
     },
     
+    // Fungsi lainnya tetap membutuhkan token karena untuk admin
     createTestimonial: async (data: FormData) => {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+  
       try {
         const response = await api.post<Testimonial>('/testimonials/', data, {
           headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+            'Authorization': `Token ${token}`
+          }
         });
         return response.data;
       } catch (error) {
-        console.error('Error creating testimonial:', error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            Cookies.remove('token');
+            window.location.href = '/admin/login';
+            throw new Error('Session expired. Please login again.');
+          }
+          throw new Error(error.response?.data?.error || 'Failed to create testimonial');
+        }
         throw error;
       }
     },
     
     updateTestimonial: async (id: number, data: FormData) => {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+  
       try {
         const response = await api.put<Testimonial>(`/testimonials/${id}/`, data, {
           headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+            'Authorization': `Token ${token}`
+          }
         });
         return response.data;
       } catch (error) {
-        console.error('Error updating testimonial:', error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            Cookies.remove('token');
+            window.location.href = '/admin/login';
+            throw new Error('Session expired. Please login again.');
+          }
+          throw new Error(error.response?.data?.error || 'Failed to update testimonial');
+        }
         throw error;
       }
     },
   
     toggleStatus: async (id: number, isActive: boolean) => {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+  
       try {
-        const response = await api.patch<Testimonial>(`/testimonials/${id}/`, {
-          is_active: isActive
+        const formData = new FormData();
+        formData.append('is_active', isActive.toString());
+        
+        const response = await api.patch<Testimonial>(`/testimonials/${id}/`, formData, {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
         });
         return response.data;
       } catch (error) {
-        console.error('Error toggling testimonial status:', error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            Cookies.remove('token');
+            window.location.href = '/admin/login';
+            throw new Error('Session expired. Please login again.');
+          }
+          throw new Error(error.response?.data?.error || 'Failed to update status');
+        }
         throw error;
       }
     },
     
     deleteTestimonial: async (id: number) => {
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+  
       try {
-        await api.delete(`/testimonials/${id}/`);
+        await api.delete(`/testimonials/${id}/`, {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
       } catch (error) {
-        console.error('Error deleting testimonial:', error);
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            Cookies.remove('token');
+            window.location.href = '/admin/login';
+            throw new Error('Session expired. Please login again.');
+          }
+          throw new Error(error.response?.data?.error || 'Failed to delete testimonial');
+        }
         throw error;
       }
     }

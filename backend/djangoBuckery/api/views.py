@@ -6,15 +6,17 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.parsers import MultiPartParser, FormParser 
 from rest_framework.authtoken.models import Token
 from django.db import transaction  
-from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember
+from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember, UserProfile
 from .serializers import (
     AdminStaffSerializer,
     CategorySerializer,
     ContactInformationSerializer, 
     ProductSerializer,
-    TestimonialSerializer, 
+    TestimonialSerializer,
+    UserProfileSerializer, 
     UserSerializer,
     TimelineEventSerializer,
     TeamMemberSerializer
@@ -333,6 +335,25 @@ def logout_view(request):
             'message': 'Successfully logged out'
         })
 
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+    except UserProfile.DoesNotExist:
+        profile = UserProfile.objects.create(user=request.user)
+
+    if request.method == 'GET':
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data)
+
+    elif request.method == 'PUT':
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -345,21 +366,27 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    parser_classes = (MultiPartParser, FormParser) 
     
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminUser]
-        else:
-            permission_classes = []
-        return [permission() for permission in permission_classes]
+            return [IsAdminUser()]
+        return [AllowAny()]
     
-
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 class TimelineEventViewSet(viewsets.ModelViewSet):
     queryset = TimelineEvent.objects.all()
     serializer_class = TimelineEventSerializer
@@ -397,17 +424,58 @@ class ContactInformationViewSet(viewsets.ModelViewSet):
 
 #TESIMONY
 class TestimonialViewSet(viewsets.ModelViewSet):
-    queryset = Testimonial.objects.filter(is_active=True)
+    queryset = Testimonial.objects.all()
     serializer_class = TestimonialSerializer
+    authentication_classes = [TokenAuthentication]
+    parser_classes = (MultiPartParser, FormParser)
     
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminUser]
+        """
+        Override untuk mengizinkan akses publik ke list dan detail,
+        tapi tetap membutuhkan admin untuk create/update/delete
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = []  # Publik bisa akses
         else:
-            permission_classes = [AllowAny]
+            permission_classes = [IsAdminUser]  # Hanya admin yang bisa modifikasi
         return [permission() for permission in permission_classes]
     
+    def get_queryset(self):
+        """
+        Pengguna publik hanya bisa lihat testimonial yang aktif,
+        Admin bisa lihat semua
+        """
+        if self.request.user and self.request.user.is_staff:
+            return Testimonial.objects.all()
+        return Testimonial.objects.filter(is_active=True)
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
     def get_queryset(self):
         if self.request.user.is_staff:
             return Testimonial.objects.all()
         return Testimonial.objects.filter(is_active=True)
+        
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        try:
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

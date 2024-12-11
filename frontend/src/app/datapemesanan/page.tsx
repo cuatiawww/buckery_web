@@ -111,8 +111,8 @@ const handleSubmit = (e: React.FormEvent) => {
         <div className="container mx-auto px-4 py-8">
           <div className="bg-yellow-400 rounded-3xl border-4 border-black p-6">
             <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* Map Section */}
+              <div className="grid  gap-8">
+                {/* Map Section
                 <div className="space-y-4">
                   <div className="relative">
                     <input
@@ -129,7 +129,7 @@ const handleSubmit = (e: React.FormEvent) => {
                       <p className="text-gray-500">Peta Lokasi</p>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Form Fields */}
                 <div className="space-y-4">
