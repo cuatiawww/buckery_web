@@ -1,3 +1,4 @@
+from django import views
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
@@ -31,10 +32,9 @@ urlpatterns = [
     path('auth/', include([
         # User auth
         path('user-login/', user_login, name='user-login'),
+        path('admin-login/', admin_staff_login, name='admin-login'),
         path('user-register/', user_register, name='user-register'),
         
-        # Admin/Staff auth
-        path('admin-login/', admin_staff_login, name='admin-login'),
         
         # Staff management
         path('staff/', include([
@@ -46,6 +46,5 @@ urlpatterns = [
         path('logout/', logout_view, name='logout'),
     ])),
 
-    # Tambahkan endpoint untuk user profile
     path('user/profile/', user_profile, name='user-profile'),
 ]

@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # CUSTOM USER
+
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
         ('ADMIN', 'Admin'),
@@ -18,7 +19,6 @@ class CustomUser(AbstractUser):
     nama_lengkap = models.CharField(max_length=255)
 
     def save(self, *args, **kwargs):
-        # set staff dan superuser
         if self.user_type == 'ADMIN':
             self.is_staff = True
             self.is_superuser = True
@@ -39,7 +39,7 @@ class CustomUser(AbstractUser):
         ]
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -48,7 +48,7 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile for {self.user.username}"
-
+    
 #CRUD DATABASE
 
 # KATEGORI 

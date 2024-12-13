@@ -1,25 +1,36 @@
-// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token');
-  const userType = request.cookies.get('userType');
+  const token = request.cookies.get('token')?.value;
+  const userType = request.cookies.get('userType')?.value;
+
+  // Debug log
+  console.log('Middleware check:', { path: request.nextUrl.pathname, token, userType });
 
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    // Bypass untuk halaman login admin
+    // Izinkan akses ke halaman login admin
     if (request.nextUrl.pathname === '/admin/login') {
+      // Jika sudah login sebagai admin, redirect ke dashboard
+      if (token && ['ADMIN', 'STAFF'].includes(userType || '')) {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
       return NextResponse.next();
     }
 
-    // Redirect ke login admin jika tidak ada token
+    // Cek autentikasi untuk halaman admin lainnya
     if (!token) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
-    // Verifikasi userType untuk admin
-    if (userType?.value && !['ADMIN', 'STAFF'].includes(userType.value)) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+    // Cek otorisasi
+    if (!userType || !['ADMIN', 'STAFF'].includes(userType)) {
+      // Clear invalid auth
+      const response = NextResponse.redirect(new URL('/admin/login', request.url));
+      response.cookies.delete('token');
+      response.cookies.delete('userType');
+      response.cookies.delete('username');
+      return response;
     }
   }
 

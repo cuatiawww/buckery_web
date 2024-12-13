@@ -1,4 +1,4 @@
-// app/profile/page.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -8,14 +8,23 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { AlertCircle } from 'lucide-react';
-import { userService, UserProfile } from '@/services/api';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import api, { userService } from '@/services/api';
+import type { UserProfile } from '@/services/api';
+import Cookies from 'js-cookie';
 
-export default function ProfilePage() {
+interface ErrorState {
+  phone: string;
+  address: string;
+  notes: string;
+}
+
+const ProfilePage: React.FC = () => {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, userType } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [profile, setProfile] = useState<UserProfile>({
@@ -29,62 +38,131 @@ export default function ProfilePage() {
     updated_at: ''
   });
 
+  const [errors, setErrors] = useState<ErrorState>({
+    phone: '',
+    address: '',
+    notes: ''
+  });
+
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/login');
+    const checkAuthAndFetchProfile = async () => {
+      const token = Cookies.get('token');
+      
+      if (!authLoading) {
+        if (!token || !isAuthenticated) {
+          router.push('/login');
+          return;
+        }
+  
+        try {
+          setIsLoading(true);
+          // Set token di header request
+          api.defaults.headers.common['Authorization'] = `Token ${token}`;
+          const data = await userService.getProfile();
+          setProfile(data);
+          setMessage('');
+        } catch (error: any) {
+          if (error.response?.status === 401) {
+            Cookies.remove('token');
+            router.push('/login');
+          } else {
+            setMessage('Gagal mengambil data profil. Silakan coba lagi.');
+            setMessageType('error');
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+  
+    checkAuthAndFetchProfile();
+  }, [isAuthenticated, authLoading, router]);
+
+  const validateForm = (): boolean => {
+    let isValid = true;
+    const newErrors = {
+      phone: '',
+      address: '',
+      notes: ''
+    };
+
+    if (profile.phone && !/^[0-9]{10,13}$/.test(profile.phone)) {
+      newErrors.phone = 'Nomor telepon harus 10-13 digit';
+      isValid = false;
+    }
+
+    if (profile.address && profile.address.length < 10) {
+      newErrors.address = 'Alamat minimal 10 karakter';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
 
-    if (isAuthenticated) {
-      fetchProfile();
-    }
-  }, [isAuthenticated, authLoading]);
-
-  const fetchProfile = async () => {
     try {
-      setIsLoading(true);
-      const data = await userService.getProfile();
-      setProfile(data);
-      setMessage('');
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setMessage('Gagal mengambil data profil');
-      setMessageType('error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      setIsSaving(true);
+      const token = Cookies.get('token');
+      
+      if (!token) {
+        throw new Error('No token found');
+      }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
       await userService.updateProfile({
         phone: profile.phone,
         address: profile.address,
         notes: profile.notes
       });
+
       setMessage('Profil berhasil diperbarui');
       setMessageType('success');
       setIsEditing(false);
+
+      const updatedData = await userService.getProfile();
+      setProfile(updatedData);
     } catch (error) {
-      console.error('Error updating profile:', error);
-      setMessage('Gagal memperbarui profil');
-      setMessageType('error');
+      if (error instanceof Error) {
+        if (error.message === 'Session expired' || error.message === 'No token found') {
+          if (userType === 'ADMIN' || userType === 'STAFF') {
+            router.push('/admin/login');
+          } else {
+            router.push('/login');
+          }
+        } else {
+          setMessage('Gagal memperbarui profil. Silakan coba lagi.');
+          setMessageType('error');
+        }
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
     const { name, value } = e.target;
     setProfile(prev => ({
       ...prev,
       [name]: value
+    }));
+    setErrors(prev => ({
+      ...prev,
+      [name]: ''
     }));
   };
 
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
+        <Loader2 className="w-32 h-32 animate-spin text-black" />
       </div>
     );
   }
@@ -174,6 +252,9 @@ export default function ProfilePage() {
                         ${!isEditing && 'bg-gray-100'}`}
                       disabled={!isEditing}
                     />
+                    {errors.phone && (
+                      <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                    )}
                   </div>
 
                   <div>
@@ -187,6 +268,9 @@ export default function ProfilePage() {
                         ${!isEditing && 'bg-gray-100'}`}
                       disabled={!isEditing}
                     />
+                    {errors.address && (
+                      <p className="mt-1 text-sm text-red-600">{errors.address}</p>
+                    )}
                   </div>
 
                   <div>
@@ -204,7 +288,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex justify-end space-x-4">
                 {!isEditing ? (
                   <button
@@ -220,17 +303,20 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => {
                         setIsEditing(false);
-                        fetchProfile(); // Reset form
+                        setErrors({ phone: '', address: '', notes: '' });
+                        setMessage('');
                       }}
                       className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-black rounded-xl border-4 border-black font-bold"
+                      disabled={isSaving}
                     >
                       Batal
                     </button>
                     <button
                       type="submit"
                       className="px-6 py-2 bg-tertiary hover:bg-primary text-black rounded-xl border-4 border-black font-bold"
+                      disabled={isSaving}
                     >
-                      Simpan
+                      {isSaving ? 'Menyimpan...' : 'Simpan'}
                     </button>
                   </>
                 )}
@@ -243,4 +329,6 @@ export default function ProfilePage() {
       <Footer />
     </main>
   );
-}
+};
+
+export default ProfilePage;

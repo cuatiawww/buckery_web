@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/admin/login/page.tsx
 'use client';
 
@@ -7,6 +8,7 @@ import Image from 'next/image';
 import { Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import Cookies from 'js-cookie';
 
 const AdminLoginPage = () => {
   const router = useRouter();
@@ -24,21 +26,31 @@ const AdminLoginPage = () => {
     setError('');
     
     try {
+      console.log('Login attempt with:', formData);
       const response = await authService.adminStaffLogin(formData);
-      
-      // Verify that the user is an admin or staff
+      console.log('Login response:', response);
+  
       if (!['ADMIN', 'STAFF'].includes(response.user_type)) {
         setError('Access denied. This login is only for admin and staff.');
         return;
       }
-
+  
       if (response.token) {
         login(response.token, response.username, response.user_type);
-        // Redirect to admin dashboard
-        router.push('/admin/dashboard');
+        
+        // Tambahkan delay sebelum redirect untuk memastikan state terupdate
+        setTimeout(() => {
+          // Debug log sebelum redirect
+          console.log('Auth state before redirect:', {
+            token: Cookies.get('token'),
+            username: Cookies.get('username'),
+            userType: Cookies.get('userType')
+          });
+          router.push('/admin/dashboard');
+        }, 100);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      console.error('Login error:', error); // Debug log
       if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else if (error.response?.data?.errors) {

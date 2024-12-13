@@ -32,16 +32,25 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Hanya redirect ke login jika error adalah 401 dan bukan dari endpoint login
+    // Perbaikan logika penanganan 401
     if (error.response?.status === 401 && !error.config.url.includes('login')) {
-      // Cek apakah token masih ada sebelum logout
       const token = Cookies.get('token');
+      // Jika tidak ada token, redirect ke login
       if (!token) {
         Cookies.remove('token');
         Cookies.remove('username');
         Cookies.remove('userType');
         localStorage.clear();
-        window.location.href = '/admin/login';
+        window.location.href = '/login'; // Sesuaikan dengan route login yang benar
+      }
+      // Jika ada token tapi dapat 401, mungkin token expired
+      else {
+        // Hapus token dan redirect ke login
+        Cookies.remove('token');
+        Cookies.remove('username');
+        Cookies.remove('userType');
+        localStorage.clear();
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);
@@ -172,13 +181,12 @@ export interface TimelineEvent {
 
   export const userService = {
     getProfile: async () => {
-      try {
-        // Check token before making request
-        const token = Cookies.get('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
   
+      try {
         const response = await api.get<UserProfile>('/user/profile/', {
           headers: {
             'Authorization': `Token ${token}`
@@ -192,12 +200,12 @@ export interface TimelineEvent {
     },
   
     updateProfile: async (data: Partial<UserProfile>) => {
-      try {
-        const token = Cookies.get('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
+      const token = Cookies.get('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
   
+      try {
         const response = await api.put<UserProfile>('/user/profile/', data, {
           headers: {
             'Authorization': `Token ${token}`
@@ -210,6 +218,7 @@ export interface TimelineEvent {
       }
     }
   };
+  
 // Auth services
 export const authService = {
   userLogin: async (formData: FormDataLogin) => {
@@ -237,12 +246,11 @@ export const authService = {
 
   adminStaffLogin: async (formData: FormDataLogin) => {
     try {
-      const response = await api.post('/auth/admin-login/', {
+      // Pastikan endpoint yang benar
+      const response = await api.post<LoginResponse>('/auth/admin-login/', {
         username: formData.emailUsername,
         password: formData.password
       });
-      
-      // Hapus penyimpanan token di sini karena akan ditangani oleh AuthContext
       return response.data;
     } catch (error) {
       console.error('Admin login error:', error);

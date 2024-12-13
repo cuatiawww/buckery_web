@@ -34,9 +34,10 @@ class TeamMemberSerializer(serializers.ModelSerializer):
 # USER, ADMIN, STAFF
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-    email = serializers.EmailField(source='user.email', read_only=True)
-    nama_lengkap = serializers.CharField(source='user.nama_lengkap', read_only=True)
+    username = serializers.CharField(source='user.username')
+    email = serializers.EmailField(source='user.email')
+    nama_lengkap = serializers.CharField(source='user.nama_lengkap')
+    user_type = serializers.CharField(source='user.user_type')
 
     class Meta:
         model = UserProfile
@@ -44,21 +45,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'username',
             'email', 
             'nama_lengkap',
+            'user_type',
             'phone',
             'address',
             'notes',
             'created_at',
             'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['username', 'email', 'nama_lengkap', 'user_type', 'created_at', 'updated_at']
 
     def update(self, instance, validated_data):
+        # Hanya update field yang bisa diubah
         instance.phone = validated_data.get('phone', instance.phone)
         instance.address = validated_data.get('address', instance.address)
         instance.notes = validated_data.get('notes', instance.notes)
         instance.save()
         return instance
-
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     email = serializers.EmailField(required=True)

@@ -25,6 +25,7 @@ from django.db import IntegrityError
 
 logger = logging.getLogger(__name__)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def user_login(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -65,6 +66,7 @@ def user_login(request):
             'message': 'An error occurred during login'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def user_register(request):
     logger.info(f"Received registration request with data: {request.data}")
     with transaction.atomic():  
@@ -139,8 +141,8 @@ def register_staff(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])  # Tambahkan ini
 def admin_staff_login(request):
-    """Login for admin and staff users"""
     username = request.data.get('username')
     password = request.data.get('password')
     
@@ -161,25 +163,23 @@ def admin_staff_login(request):
                     'user_type': user.user_type,
                     'username': user.username,
                     'is_staff': user.is_staff,
-                    'is_superuser': user.is_superuser,
-                    'nama_lengkap': user.nama_lengkap
+                    'is_superuser': user.is_superuser
                 })
             else:
                 return Response({
                     'status': 'error',
                     'message': 'Account is disabled'
-                }, status.HTTP_403_FORBIDDEN)
+                }, status=status.HTTP_403_FORBIDDEN)
         return Response({
             'status': 'error',
             'message': 'Invalid credentials or insufficient permissions'
-        }, status.HTTP_401_UNAUTHORIZED)
-        
+        }, status=status.HTTP_401_UNAUTHORIZED)
     except Exception as e:
-        logger.error(f"Admin login error: {str(e)}")
         return Response({
             'status': 'error',
             'message': str(e)
-        }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
 @api_view(['POST'])
 @permission_classes([IsAdminUser])  # Restrict access to admin only
 def create_staff(request):
@@ -339,21 +339,32 @@ def logout_view(request):
 @permission_classes([IsAuthenticated])
 def user_profile(request):
     try:
-        profile = UserProfile.objects.get(user=request.user)
-    except UserProfile.DoesNotExist:
-        profile = UserProfile.objects.create(user=request.user)
+        # Get or create profile
+        profile, created = UserProfile.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'phone': '',
+                'address': '',
+                'notes': ''
+            }
+        )
 
-    if request.method == 'GET':
-        serializer = UserProfileSerializer(profile)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+        if request.method == 'GET':
+            serializer = UserProfileSerializer(profile)
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        elif request.method == 'PUT':
+            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer

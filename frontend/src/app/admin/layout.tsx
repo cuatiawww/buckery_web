@@ -1,44 +1,50 @@
-// app/admin/layout.tsx
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, userType } = useAuth();
+  const { isAuthenticated, userType, isLoading } = useAuth();
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token');
-      const savedUserType = localStorage.getItem('userType');
+    const validateAccess = async () => {
+      const token = localStorage.getItem('token') || '';
+      const currentUserType = localStorage.getItem('userType') || '';
+      
+      console.log('Validating admin access:', {
+        isAuthenticated,
+        userType,
+        token,
+        currentUserType
+      });
 
-      if (!token || !['ADMIN', 'STAFF'].includes(savedUserType || '')) {
-        router.push('/login');
+      if (!isLoading && (!isAuthenticated || !['ADMIN', 'STAFF'].includes(userType || ''))) {
+        console.log('Unauthorized admin access, redirecting...');
+        router.push('/admin/login');
       }
-      setIsChecking(false);
     };
 
-    checkAuth();
-  }, [router]);
+    validateAccess();
+  }, [isAuthenticated, userType, isLoading, router]);
 
-  if (isChecking) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-black"></div>
       </div>
     );
   }
 
+  // Jika tidak terautentikasi atau bukan admin/staff, return null
   if (!isAuthenticated || !['ADMIN', 'STAFF'].includes(userType || '')) {
     return null;
   }
 
-  return <div className="min-h-screen bg-gray-50">{children}</div>;
+  return <div className="min-h-screen bg-primary_bg">{children}</div>;
 }

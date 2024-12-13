@@ -32,21 +32,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkAuth = async () => {
       setIsLoading(true);
       try {
-        const tokenFromCookie = Cookies.get('token');
-        console.log('Token from cookie:', tokenFromCookie); // Debug log
-
+        const tokenFromCookie = Cookies.get('token') || localStorage.getItem('token');
+        console.log('Checking auth with token:', tokenFromCookie);
+  
         if (tokenFromCookie) {
-          // Set token in axios headers
           api.defaults.headers.common['Authorization'] = `Token ${tokenFromCookie}`;
           
-          // Try to fetch profile to validate token
           try {
-            await api.get('/user/profile/');
-            // If successful, set auth state
+            const userTypeFromStorage = Cookies.get('userType') || localStorage.getItem('userType');
+            const usernameFromStorage = Cookies.get('username') || localStorage.getItem('username');
+            
+            // Restore auth state
             setToken(tokenFromCookie);
             setIsAuthenticated(true);
-            setUsername(Cookies.get('username') || null);
-            setUserType(Cookies.get('userType') || null);
+            setUsername(usernameFromStorage);
+            setUserType(userTypeFromStorage);
+            
+            // Validate token dengan request
+            await api.get('/user/profile/');
           } catch (error) {
             console.error('Token validation failed:', error);
             clearAuth();
@@ -61,31 +64,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
       }
     };
-
+  
     checkAuth();
   }, []);
 
 
   const synchronizeAuth = (token: string, username: string, userType: string) => {
-    // Set cookies dengan opsi yang benar
+    // Set cookies dengan opsi yang lebih spesifik
     const cookieOptions: Cookies.CookieAttributes = { 
-      secure: true, 
-      sameSite: 'Strict', // Perhatikan 'S' kapital
-      expires: 7 
+      expires: 7, // 7 hari
+      path: '/',
+      sameSite: 'Lax',
+      secure: process.env.NODE_ENV === 'production'
     };
     
+    // Set cookies dan localStorage sebagai fallback
     Cookies.set('token', token, cookieOptions);
     Cookies.set('username', username, cookieOptions);
     Cookies.set('userType', userType, cookieOptions);
-    
-    // Set localStorage sebagai backup
     localStorage.setItem('token', token);
     localStorage.setItem('username', username);
     localStorage.setItem('userType', userType);
-
-    // Set axios default header
+    
+    // Set axios header
     api.defaults.headers.common['Authorization'] = `Token ${token}`;
-};
+    
+    // Debug log
+    console.log('Auth synchronized:', {
+      token: Cookies.get('token'),
+      username: Cookies.get('username'),
+      userType: Cookies.get('userType')
+    });
+  };
 
 const clearAuth = () => {
   delete api.defaults.headers.common['Authorization'];
