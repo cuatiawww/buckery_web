@@ -293,39 +293,44 @@ export const adminService = {
   },
   listStaff: async () => {
     try {
-      const response = await api.get('/auth/staff/list/'); // Hapus /api
+      const response = await api.get('/auth/staff/list/');
       return response.data;
     } catch (error) {
       console.error('Error fetching staff list:', error);
       throw error;
     }
-},
+  },
 
-createStaff: async (data: {
-  username: string;
-  email: string;
-  password: string;
-  nama_lengkap: string;
-  user_type: string;
-}) => {
-  try {
-    const response = await api.post('/auth/staff/create/', data);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating staff:', error);
-    throw error;
-  }
-},
-
-updateStaff: async (staffId: number, data: Partial<StaffData>) => {
+  createStaff: async (data: {
+    username: string;
+    email: string;
+    password: string;
+    nama_lengkap: string;
+    user_type: string;
+  }) => {
     try {
-      const response = await api.post(`/auth/staff/update/${staffId}/`, data); // Hapus /api
+      const response = await api.post('/auth/staff/create/', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating staff:', error);
+      throw error;
+    }
+  },
+
+  updateStaff: async (staffId: number, data: {
+    username?: string;
+    email?: string;
+    nama_lengkap?: string;
+    is_active?: boolean;
+  }) => {
+    try {
+      const response = await api.post(`/auth/staff/update/${staffId}/`, data);
       return response.data;
     } catch (error) {
       console.error('Error updating staff:', error);
       throw error;
     }
-}
+  }
 };
 
 // Menu services

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { menuService } from '@/services/api';
 import type { Product, Category } from '@/services/api';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';  // Ubah ini
+import { useRouter } from 'next/navigation';  
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
