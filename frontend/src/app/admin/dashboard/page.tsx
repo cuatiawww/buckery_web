@@ -53,7 +53,15 @@ const AdminDashboard = () => {
       link: '/admin/contactinfo',
       adminOnly: false,
       icon: '📞'
-    }
+    },
+    {
+      title: 'Tentang Kami',
+      description: 'Kelola informasi tim dan perjalanan perusahaan',
+      link: '/admin/about',
+      adminOnly: false,
+      icon: '👥'
+    },
+    
   ];
 
   return (

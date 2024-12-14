@@ -122,23 +122,23 @@ export interface Category {
 }
 
 export interface TimelineEvent {
-    id: number;
-    year: string;
-    title: string;
-    description: string;
-    image: string | null;
-    order: number;
-  }
-  
-  export interface TeamMember {
-    id: number;
-    name: string;
-    role: string;
-    quote: string | null;
-    image: string | null;
-    member_type: 'FOUNDER' | 'TEAM';
-    order: number;
-  }
+  id: number;
+  year: string;
+  title: string;
+  description: string;
+  image: string | null;
+  order: number;
+}
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  quote: string | null;
+  image: string | null;
+  member_type: 'FOUNDER' | 'TEAM';
+  order: number;
+}
 
   export interface ContactInfo {
     id: number;  // Tambahkan ini juga
@@ -426,74 +426,115 @@ export const menuService = {
 
 // About Services
 export const aboutService = {
-    getTimelineEvents: async () => {
-      try {
-        const response = await api.get('/timeline-events/');
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
-    },
-  
-    getFounders: async () => {
-      try {
-        const response = await api.get('/team-members/?type=FOUNDER');
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
-    },
-  
-    getTeamMembers: async () => {
-      try {
-        const response = await api.get('/team-members/?type=TEAM');
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
-    },
-    createTeamMember: async (data: FormData) => {
-      try {
-        const response = await api.post<TeamMember>('/team-members/', data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        return response.data;
-      } catch (error) {
-        console.error('Error creating team member:', error);
-        throw error;
-      }
-    },
-  
-    updateTeamMember: async (id: number, data: FormData) => {
-      try {
-        const response = await api.put<TeamMember>(`/team-members/${id}/`, data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        return response.data;
-      } catch (error) {
-        console.error('Error updating team member:', error);
-        throw error;
-      }
-    },
-  
-    deleteTeamMember: async (id: number) => {
-      try {
-        await api.delete(`/team-members/${id}/`);
-      } catch (error) {
-        console.error('Error deleting team member:', error);
-        throw error;
-      }
-    },
-  };
+  // Timeline Events
+  getTimelineEvents: async () => {
+    try {
+      const response = await api.get<TimelineEvent[]>('/timeline-events/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching timeline events:', error);
+      throw error;
+    }
+  },
+
+  createTimelineEvent: async (data: FormData) => {
+    try {
+      const response = await api.post('/timeline-events/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating timeline event:', error);
+      throw error;
+    }
+  },
+
+  updateTimelineEvent: async (id: number, data: FormData) => {
+    try {
+      const response = await api.put(`/timeline-events/${id}/`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating timeline event:', error);
+      throw error;
+    }
+  },
+
+  deleteTimelineEvent: async (id: number) => {
+    try {
+      await api.delete(`/timeline-events/${id}/`);
+    } catch (error) {
+      console.error('Error deleting timeline event:', error);
+      throw error;
+    }
+  },
+
+  // Team Members
+  getFounders: async () => {
+    try {
+      const response = await api.get('/team-members/?type=FOUNDER');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getTeamMembers: async () => {
+    try {
+      const response = await api.get('/team-members/?type=TEAM');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createTeamMember: async (data: FormData) => {
+    try {
+      const response = await api.post<TeamMember>('/team-members/', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating team member:', error);
+      throw error;
+    }
+  },
+
+  updateTeamMember: async (id: number, data: FormData) => {
+    try {
+      const response = await api.put<TeamMember>(`/team-members/${id}/`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating team member:', error);
+      throw error;
+    }
+  },
+
+  deleteTeamMember: async (id: number) => {
+    try {
+      await api.delete(`/team-members/${id}/`);
+    } catch (error) {
+      console.error('Error deleting team member:', error);
+      throw error;
+    }
+  },
+};
 
   // CONTACT INFO
   export const contactService = {
     getContactInfo: async () => {
-      try {
+      try { 
         const response = await api.get<ContactInfo>('/contact-info/');
         return response.data;
       } catch (error) {

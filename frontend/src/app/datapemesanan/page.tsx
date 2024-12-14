@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { userService, UserProfile } from '@/services/api';
 import Navbar from '@/components/Navbar';
-import { ArrowRight, ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown, Loader2 } from 'lucide-react';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,6 +22,8 @@ interface OrderFormData {
 
 const Page = () => {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<OrderFormData>({
     name: '',
     phone: '',
@@ -28,6 +33,7 @@ const Page = () => {
     deliveryMethod: ''
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [error, setError] = useState('');
 
   const deliveryOptions = [
     { id: 'pickup', label: 'Pick Up (ambil sendiri)', price: 0 },
@@ -35,6 +41,36 @@ const Page = () => {
     { id: 'gojek', label: 'Go-Jek, Grab, Shopee food.', price: 15000 },
     { id: 'courier', label: 'Jarak jauh (JNE, JNT, Paxel)', price: 20000 }
   ];
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        const profileData = await userService.getProfile();
+        // Pre-fill form with profile data
+        setFormData(prev => ({
+          ...prev,
+          name: profileData.nama_lengkap || '',
+          phone: profileData.phone || '',
+          email: profileData.email || '',
+          address: profileData.address || '',
+          notes: profileData.notes || ''
+        }));
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setError('Gagal memuat data profil');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchUserProfile();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -52,21 +88,28 @@ const Page = () => {
     setIsDropdownOpen(false);
   };
 
-const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form Data:', formData); // Debug log
     if (!formData.name || !formData.phone || !formData.email || !formData.address || !formData.deliveryMethod) {
       alert('Mohon lengkapi semua data yang diperlukan');
       return;
     }
     try {
       localStorage.setItem('orderData', JSON.stringify(formData));
-      console.log('Data tersimpan di localStorage'); // Debug log
       router.push('/pembayaran');
     } catch (error) {
       console.error('Error:', error);
+      setError('Gagal menyimpan data pesanan');
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
+        <Loader2 className="w-32 h-32 animate-spin text-black" />
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-yellow-400">
@@ -104,33 +147,19 @@ const handleSubmit = (e: React.FormEvent) => {
             />
           </svg>
         </div>
-      </div>
-
+      </div>      
       {/* Main Content */}
       <div className="bg-primary_bg">
         <div className="container mx-auto px-4 py-8">
           <div className="bg-yellow-400 rounded-3xl border-4 border-black p-6">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="grid  gap-8">
-                {/* Map Section
-                <div className="space-y-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Cari titik alamat"
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black pr-10"
-                    />
-                    <button type="button" className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      🔍
-                    </button>
-                  </div>
-                  <div className="w-full h-[300px] bg-white rounded-xl border-2 border-black">
-                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                      <p className="text-gray-500">Peta Lokasi</p>
-                    </div>
-                  </div>
-                </div> */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-100 border-2 border-red-400 text-red-700 rounded-lg">
+                {error}
+              </div>
+            )}
 
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid gap-8">
                 {/* Form Fields */}
                 <div className="space-y-4">
                   <div>
@@ -140,8 +169,8 @@ const handleSubmit = (e: React.FormEvent) => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Isi nama lengkap anda"
                       className="w-full px-4 py-2 rounded-xl border-2 border-black"
+                      placeholder="Nama lengkap sesuai profil"
                       required
                     />
                   </div>
@@ -153,8 +182,8 @@ const handleSubmit = (e: React.FormEvent) => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="Isi no telepon aktif anda"
                       className="w-full px-4 py-2 rounded-xl border-2 border-black"
+                      placeholder="Nomor telepon sesuai profil"
                       required
                     />
                   </div>
@@ -166,8 +195,8 @@ const handleSubmit = (e: React.FormEvent) => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="Isi email aktif anda"
                       className="w-full px-4 py-2 rounded-xl border-2 border-black"
+                      placeholder="Email sesuai profil"
                       required
                     />
                   </div>
@@ -178,9 +207,9 @@ const handleSubmit = (e: React.FormEvent) => {
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      placeholder="Isi alamat lengkap untuk alamat pengiriman"
                       rows={4}
                       className="w-full px-4 py-2 rounded-xl border-2 border-black resize-none"
+                      placeholder="Alamat pengiriman sesuai profil"
                       required
                     />
                   </div>
@@ -191,60 +220,60 @@ const handleSubmit = (e: React.FormEvent) => {
                       name="notes"
                       value={formData.notes}
                       onChange={handleInputChange}
-                      placeholder="Silahkan masukkan catatan jika diperlukan"
                       rows={4}
                       className="w-full px-4 py-2 rounded-xl border-2 border-black resize-none"
+                      placeholder="Catatan tambahan untuk pesanan"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Delivery Options */}
-              <div className="bg-sky-200 rounded-xl border-2 border-black p-4">
-                <h3 className="font-bold text-xl mb-4">Pilih Pengiriman</h3>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full bg-white px-4 py-3 rounded-xl border-2 border-black flex justify-between items-center font-bold"
-                  >
-                    {formData.deliveryMethod ? 
-                      deliveryOptions.find(opt => opt.id === formData.deliveryMethod)?.label : 
-                      'Pilih metode pengiriman'}
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
-                  </button>
-                  
-                  {isDropdownOpen && (
-                    <div className="absolute w-full mt-2 bg-white rounded-xl border-2 border-black overflow-hidden z-10">
-                      {deliveryOptions.map((option) => (
-                        <button
-                          type="button"
-                          key={option.id}
-                          onClick={() => handleDeliverySelect(option.id)}
-                          className="w-full px-4 py-3 text-left font-bold hover:bg-sky-100 transition-colors"
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+               {/* Delivery Options */}
+ <div className="bg-sky-200 rounded-xl border-2 border-black p-4">
+ <h3 className="font-bold text-xl mb-4">Pilih Pengiriman</h3>
+ <div className="relative">
+   <button
+     type="button"
+     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+     className="w-full bg-white px-4 py-3 rounded-xl border-2 border-black flex justify-between items-center font-bold"
+   >
+     {formData.deliveryMethod ? 
+       deliveryOptions.find(opt => opt.id === formData.deliveryMethod)?.label : 
+       'Pilih metode pengiriman'}
+     <ChevronDown className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
+   </button>
+   
+   {isDropdownOpen && (
+     <div className="absolute w-full mt-2 bg-white rounded-xl border-2 border-black overflow-hidden z-10">
+       {deliveryOptions.map((option) => (
+         <button
+           type="button"
+           key={option.id}
+           onClick={() => handleDeliverySelect(option.id)}
+           className="w-full px-4 py-3 text-left font-bold hover:bg-sky-100 transition-colors"
+         >
+           {option.label}
+         </button>
+       ))}
+     </div>
+   )}
+ </div>
+</div>
 
-              {/* Submit Button */}
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={!formData.deliveryMethod}
-                  className={`flex items-center space-x-2 px-8 py-4 rounded-xl border-4 border-black font-bold text-xl transition-colors
-                    ${formData.deliveryMethod ? 
-                      'bg-tertiary hover:bg-primary text-black' : 
-                      'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
-                >
-                  <span>LANJUT KE PEMBAYARAN</span>
-                  <ArrowRight className="w-6 h-6" />
-                </button>
-              </div>
+{/* Submit Button */}
+<div className="flex justify-end">
+ <button
+   type="submit"
+   disabled={!formData.deliveryMethod}
+   className={`flex items-center space-x-2 px-8 py-4 rounded-xl border-4 border-black font-bold text-xl transition-colors
+     ${formData.deliveryMethod ? 
+       'bg-tertiary hover:bg-primary text-black' : 
+       'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
+ >
+   <span>LANJUT KE PEMBAYARAN</span>
+   <ArrowRight className="w-6 h-6" />
+ </button>
+</div>
             </form>
           </div>
         </div>
@@ -256,3 +285,5 @@ const handleSubmit = (e: React.FormEvent) => {
 };
 
 export default Page;
+
+

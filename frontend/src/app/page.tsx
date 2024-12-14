@@ -13,7 +13,7 @@ export default function Home() {
       <HeroSection />
 
       {/* Mobile App Section */}
-      <section className="py-8 md:py-12 bg-primary_bg">
+      <section className="py-8 md:py-12 bg-primary">
         <div className="container mx-auto px-4 md:px-8 lg:px-16">
           <AboutBuckery />
         </div>

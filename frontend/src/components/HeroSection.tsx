@@ -21,7 +21,7 @@ const HeroSection = () => {
       {/* Content section remains the same */}
       <div className="container mx-auto px-4 md:px-8 lg:px-16 pt-12 md:pt-24">
         <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
-          {/* Left Section - with animations */}
+          {/* Left Section */}
           <div className={`relative z-20 max-w-xl mt-8 md:mt-16 text-center md:text-left transform transition-all duration-1000 ${
             isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
           }`}>
@@ -39,7 +39,7 @@ const HeroSection = () => {
             </button>
           </div>
 
-          {/* Right Section - Image Carousel remains the same */}
+          {/* Right Section - Image Carousel */}
           <div className={`relative mt-8 md:mt-0 transform transition-all duration-1000 ${
             isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
           }`}>
@@ -83,45 +83,43 @@ const HeroSection = () => {
         </div>
       </div>
 
-      <div className="absolute w-full -bottom-[30] left-0 right-0 z-0">
-        {/* Mobile Wave (hidden on desktop) */}
+      {/* Wave Section */}
+      <div className="absolute w-full bottom-0 left-0 right-0 z-0">
+        {/* Mobile Wave */}
         <div className="md:hidden">
-          <div className="relative h-[120px]">
+          <div className="relative h-[160px] overflow-hidden">
             <svg
               viewBox="0 0 1440 320"
-              className="absolute bottom-0 w-full"
+              className="absolute bottom-0 w-full scale-150"
               preserveAspectRatio="none"
-              // style={{ transform: 'scale(1.2)' }}
             >
               <path
                 fill="#000000"
-                d="M0,160L26.7,154.7C53.3,149,107,139,160,154.7C213.3,171,267,213,320,218.7C373.3,224,427,192,480,181.3C533.3,171,587,181,640,181.3C693.3,181,747,171,800,181.3C853.3,192,907,224,960,229.3C1013.3,235,1067,213,1120,202.7C1173.3,192,1227,192,1280,197.3C1333.3,203,1387,213,1413,218.7L1440,224L1440,320L1413.3,320C1386.7,320,1333,320,1280,320C1226.7,320,1173,320,1120,320C1066.7,320,1013,320,960,320C906.7,320,853,320,800,320C746.7,320,693,320,640,320C586.7,320,533,320,480,320C426.7,320,373,320,320,320C266.7,320,213,320,160,320C106.7,320,53,320,27,320L0,320Z"
+                d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
               />
             </svg>
           </div>
-          <div className="relative h-[120px] -mt-[40px]">
+          <div className="relative h-[160px] -mt-[40px] overflow-hidden">
             <svg
               viewBox="0 0 1440 320"
-              className="absolute bottom-0 w-full"
+              className="absolute bottom-0 w-full scale-150"
               preserveAspectRatio="none"
-              // style={{ transform: 'scale(1.2)' }}
             >
               <path
                 fill="#F8E6C2"
-                d="M0,160L26.7,154.7C53.3,149,107,139,160,154.7C213.3,171,267,213,320,218.7C373.3,224,427,192,480,181.3C533.3,171,587,181,640,181.3C693.3,181,747,171,800,181.3C853.3,192,907,224,960,229.3C1013.3,235,1067,213,1120,202.7C1173.3,192,1227,192,1280,197.3C1333.3,203,1387,213,1413,218.7L1440,224L1440,320L1413.3,320C1386.7,320,1333,320,1280,320C1226.7,320,1173,320,1120,320C1066.7,320,1013,320,960,320C906.7,320,853,320,800,320C746.7,320,693,320,640,320C586.7,320,533,320,480,320C426.7,320,373,320,320,320C266.7,320,213,320,160,320C106.7,320,53,320,27,320L0,320Z"
+                d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
               />
             </svg>
           </div>
         </div>
 
-        {/* Desktop Wave (hidden on mobile) */}
+        {/* Desktop Wave */}
         <div className="hidden md:block">
           <div className="relative h-[180px]">
             <svg
               viewBox="0 0 1440 320"
-              className="absolute -bottom-[113] w-full h-full"
+              className="absolute -bottom-[113px] w-full h-full"
               preserveAspectRatio="none"
-              // style={{ transform: 'scale(1.1)' }}
             >
               <path
                 fill="#000000"
@@ -132,9 +130,8 @@ const HeroSection = () => {
           <div className="relative h-[180px] -mt-[60px]">
             <svg
               viewBox="0 0 1440 320"
-              className="absolute bottom-0 w-full h-full "
+              className="absolute bottom-0 w-full h-full"
               preserveAspectRatio="none"
-              // style={{ transform: 'scale(1.1)' }}
             >
               <path
                 fill="#F8E6C2"
