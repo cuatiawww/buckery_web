@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, LogOut, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Menu, X, ShoppingBag } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -96,29 +96,37 @@ const Navbar = () => {
                 </button>
                 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border-4 border-black">
-                    <div className="p-2 border-b border-black">
-                      <span className="text-sm font-medium">{username}</span>
-                    </div>
-                    <Link 
-                      href="/profile" 
-                      className="block w-full p-2 text-left hover:bg-gray-50"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        <span>Profil</span>
-                      </div>
-                    </Link>
-                    <button 
-                      onClick={handleLogout} 
-                      className="w-full p-2 flex items-center space-x-2 text-red-600 hover:bg-gray-50 rounded-b-lg"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Keluar</span>
-                    </button>
-                  </div>
-                )}
+  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border-4 border-black">
+    <div className="p-2 border-b border-black">
+      <span className="text-sm font-medium">{username}</span>
+    </div>
+    <Link 
+      href="/profile" 
+      className="block w-full p-2 text-left hover:bg-gray-50"
+      onClick={() => setIsDropdownOpen(false)}
+    >
+      <div className="flex items-center gap-2">
+        <User className="w-4 h-4" />
+        <span>Profil</span>
+      </div>
+    </Link>
+    {/* Tambah link pesanan */}
+    <Link 
+      href="/orders" 
+      className="block w-full p-2 text-left hover:bg-gray-50"
+      onClick={() => setIsDropdownOpen(false)}
+    >
+      <div className="flex items-center gap-2">
+        <ShoppingBag className="w-4 h-4" />
+        <span>Status Pesanan</span>
+      </div>
+    </Link>
+    <button onClick={handleLogout} className="w-full p-2 flex items-center space-x-2 text-red-600 hover:bg-gray-50">
+      <LogOut className="w-4 h-4" />
+      <span>Keluar</span>
+    </button>
+  </div>
+)}
               </div>
             ) : (
               <Link href="/register" className="hidden md:block px-4 py-2 text-sm font-medium bg-tertiary border-4 border-black text-black rounded-xl hover:bg-primary transition-colors">

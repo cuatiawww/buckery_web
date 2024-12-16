@@ -34,6 +34,13 @@ const AdminDashboard = () => {
       icon: '👥'
     },
     {
+      title: 'Orders & Payments',
+      description: 'Monitor pesanan dan konfirmasi pembayaran',
+      link: '/admin/paymentmonitor',
+      adminOnly: false,
+      icon: '💰'
+    },
+    {
       title: 'Products',
       description: 'Kelola produk, kategori, stok, dan harga',
       link: '/admin/products',
@@ -61,8 +68,7 @@ const AdminDashboard = () => {
       adminOnly: false,
       icon: '👥'
     },
-    
-  ];
+];
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

@@ -1,4 +1,3 @@
-from django import views
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
@@ -7,7 +6,8 @@ from .views import (
     TimelineEventViewSet,
     TeamMemberViewSet,
     ContactInformationViewSet,
-    TestimonialViewSet,  
+    TestimonialViewSet,
+    PaymentViewSet,  # Add this
     user_login,
     user_register,
     admin_staff_login,
@@ -25,6 +25,7 @@ router.register('timeline-events', TimelineEventViewSet, basename='timeline-even
 router.register('team-members', TeamMemberViewSet, basename='team-member')
 router.register('contact-info', ContactInformationViewSet, basename='contact-info')
 router.register('testimonials', TestimonialViewSet, basename='testimonial')
+router.register('payments', PaymentViewSet, basename='payment')  # Add this
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -34,7 +35,6 @@ urlpatterns = [
         path('user-login/', user_login, name='user-login'),
         path('admin-login/', admin_staff_login, name='admin-login'),
         path('user-register/', user_register, name='user-register'),
-        
         
         # Staff management
         path('staff/', include([
@@ -46,5 +46,10 @@ urlpatterns = [
         path('logout/', logout_view, name='logout'),
     ])),
 
+    # User profile
     path('user/profile/', user_profile, name='user-profile'),
+    
+    # Payment specific endpoints (if needed)
+    path('payments/<int:pk>/confirm/', PaymentViewSet.as_view({'post': 'confirm_payment'}), name='confirm-payment'),
+    path('payments/<int:pk>/reject/', PaymentViewSet.as_view({'post': 'reject_payment'}), name='reject-payment'),
 ]

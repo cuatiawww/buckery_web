@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, 
-    Category, 
+    Category,
+    Payment, 
     Product, 
     TimelineEvent, 
     TeamMember,
@@ -76,3 +77,11 @@ class UserProfileAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'user__email', 'phone', 'address')
     list_filter = ('created_at', 'updated_at')
     readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ['order_number', 'customer_name', 'total', 'payment_method', 'status', 'created_at']
+    list_filter = ['status', 'payment_method', 'created_at']
+    search_fields = ['order_number', 'customer_name', 'phone', 'email']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']

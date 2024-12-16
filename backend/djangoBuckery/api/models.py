@@ -160,3 +160,70 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return f"Testimonial by @{self.username}"
+
+# PAYMENTMONITOR
+# models.py
+
+class Payment(models.Model):
+    PAYMENT_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('rejected', 'Rejected'),
+    )
+
+    PAYMENT_METHOD_CHOICES = (
+        ('bank', 'Bank Transfer'),
+        ('qris', 'QRIS'),
+    )
+
+    # Order Info
+    order_number = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    
+    # Customer Info
+    customer_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
+    address = models.TextField()
+    
+    # Order Details
+    items = models.JSONField(default=dict)  # Store array of items with quantity and price
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    # Payment Info
+    payment_method = models.CharField(
+        max_length=10, 
+        choices=PAYMENT_METHOD_CHOICES,
+        default='bank'
+    )
+    payment_proof = models.ImageField(
+        upload_to='payment_proofs/',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=10, 
+        choices=PAYMENT_STATUS_CHOICES,
+        default='pending'
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Notes and Additional Info
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Payment'
+        verbose_name_plural = 'Payments'
+
+    def __str__(self):
+        return f"Payment {self.order_number} - {self.customer_name}"
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            import time
+            self.order_number = f"ORD{int(time.time())}"
+        super().save(*args, **kwargs)

@@ -176,6 +176,24 @@ export interface TeamMember {
     updated_at: string;
   }
 
+  export interface PaymentData {
+    id: string;
+    orderNumber: string;
+    customerName: string;
+    phone: string;
+    email: string;
+    address: string;
+    items: {
+      name: string;
+      quantity: number;
+      price: number;
+    }[];
+    total: number;
+    paymentMethod: string;
+    paymentProof: string;
+    status: 'pending' | 'confirmed' | 'rejected';
+    createdAt: string;
+  }
 
   // USER SERVICE
 
@@ -744,6 +762,57 @@ export const aboutService = {
           }
           throw new Error(error.response?.data?.error || 'Failed to delete testimonial');
         }
+        throw error;
+      }
+    }
+  };
+  export const paymentService = {
+    getAllPayments: async () => {
+      try {
+        const response = await api.get('/payments/');
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching payments:', error);
+        throw error;
+      }
+    },
+  
+    getPayment: async (id: string) => {
+      try {
+        const response = await api.get(`/payments/${id}/`);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching payment:', error);
+        throw error;
+      }
+    },
+  
+    updatePaymentStatus: async (id: string, status: 'confirmed' | 'rejected') => {
+      try {
+        const formData = new FormData();
+        formData.append('status', status);
+        
+        const response = await api.patch(`/payments/${id}/`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error updating payment status:', error);
+        throw error;
+      }
+    },
+    createPayment: async (data: FormData) => {
+      try {
+        const response = await api.post('/payments/', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error creating payment:', error);
         throw error;
       }
     }

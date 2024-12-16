@@ -1,3 +1,4 @@
+from rest_framework.decorators import action
 import logging
 from django.shortcuts import render
 from rest_framework import viewsets, status
@@ -9,11 +10,12 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser 
 from rest_framework.authtoken.models import Token
 from django.db import transaction  
-from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember, UserProfile
+from .models import Category, ContactInformation, CustomUser, Payment, Product, Testimonial, TimelineEvent, TeamMember, UserProfile
 from .serializers import (
     AdminStaffSerializer,
     CategorySerializer,
-    ContactInformationSerializer, 
+    ContactInformationSerializer,
+    PaymentSerializer, 
     ProductSerializer,
     TestimonialSerializer,
     UserProfileSerializer, 
@@ -490,3 +492,74 @@ class TestimonialViewSet(viewsets.ModelViewSet):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.all().order_by('-created_at')
+    serializer_class = PaymentSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_permissions(self):
+        """
+        - List/retrieve: Admin can see all, User can only see their own
+        - Create: Authenticated users
+        - Update/Delete: Admin only
+        """
+        if self.action in ['update', 'partial_update', 'destroy', 'confirm_payment', 'reject_payment']:
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        """Filter payments based on user role"""
+        if self.request.user.is_staff:
+            return Payment.objects.all().order_by('-created_at')
+        return Payment.objects.filter(user=self.request.user).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def confirm_payment(self, request, pk=None):
+        payment = self.get_object()
+        payment.status = 'confirmed'
+        payment.save()
+        
+        # You might want to add additional logic here
+        # Like sending confirmation email/notification to user
+        
+        serializer = self.get_serializer(payment)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def reject_payment(self, request, pk=None):
+        payment = self.get_object()
+        payment.status = 'rejected'
+        payment.save()
+        
+        # You might want to add additional logic here
+        # Like sending rejection notification to user
+        
+        serializer = self.get_serializer(payment)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def get_payment_stats(self, request):
+        """Get payment statistics for admin dashboard"""
+        if not request.user.is_staff:
+            return Response(
+                {"error": "Permission denied"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        total_payments = self.get_queryset().count()
+        pending_payments = self.get_queryset().filter(status='pending').count()
+        confirmed_payments = self.get_queryset().filter(status='confirmed').count()
+        rejected_payments = self.get_queryset().filter(status='rejected').count()
+
+        return Response({
+            "total_payments": total_payments,
+            "pending_payments": pending_payments,
+            "confirmed_payments": confirmed_payments,
+            "rejected_payments": rejected_payments
+        })
+    

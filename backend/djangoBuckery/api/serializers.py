@@ -1,7 +1,8 @@
+import time
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .models import Category, ContactInformation, CustomUser, Product, Testimonial, TimelineEvent, TeamMember, UserProfile
+from .models import Category, ContactInformation, CustomUser, Payment, Product, Testimonial, TimelineEvent, TeamMember, UserProfile
 
 # CATEGORY
 
@@ -175,3 +176,30 @@ class TestimonialSerializer(serializers.ModelSerializer):
         instance.order = validated_data.get('order', instance.order)
         instance.save()
         return instance
+    
+# PAYMENT
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = [
+            'id',
+            'order_number',
+            'customer_name',
+            'phone',
+            'email',
+            'address',
+            'items',
+            'total',
+            'payment_method',
+            'payment_proof',
+            'status',
+            'created_at',
+            'notes'
+        ]
+        read_only_fields = ['id', 'order_number', 'created_at']
+
+    def create(self, validated_data):
+        # Generate unique order number
+        order_number = f"ORD{int(time.time())}"
+        validated_data['order_number'] = order_number
+        return super().create(validated_data)

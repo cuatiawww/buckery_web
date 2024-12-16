@@ -7,10 +7,12 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PaymentModal from '@/components/PaymentModal';
 
 interface OrderSummaryProps {
   subtotal: number;
   shippingCost: number;
+  orderData: OrderData; 
 }
 
 interface OrderData {
@@ -22,36 +24,44 @@ interface OrderData {
   deliveryMethod: string;
 }
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost }) => {
-  const router = useRouter();
+const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost, orderData }) => {
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const total = subtotal + shippingCost;
 
   const handlePayment = () => {
-    // Implementasi logika pembayaran
-    router.push('/success'); // Atau halaman sukses lainnya
+    setIsPaymentModalOpen(true);
   };
 
   return (
-    <div className="bg-primary rounded-xl border-2 border-black p-4 space-y-2">
-      <div className="flex justify-between items-center">
-        <span className="font-bold">Total harga</span>
-        <span className="font-bold">Rp {subtotal.toLocaleString()}</span>
+    <>
+      <div className="bg-primary rounded-xl border-2 border-black p-4 space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="font-bold">Total harga</span>
+          <span className="font-bold">Rp {subtotal.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="font-bold">Ongkos Kirim</span>
+          <span className="font-bold">Rp {shippingCost.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between items-center pt-2 border-t-2 border-black">
+          <span className="font-bold">Total Keseluruhan</span>
+          <span className="font-bold">Rp {total.toLocaleString()}</span>
+        </div>
+        <button 
+          onClick={handlePayment}
+          className="w-full bg-tertiary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-4"
+        >
+          Bayar
+        </button>
       </div>
-      <div className="flex justify-between items-center">
-        <span className="font-bold">Ongkos Kirim</span>
-        <span className="font-bold">Rp {shippingCost.toLocaleString()}</span>
-      </div>
-      <div className="flex justify-between items-center pt-2 border-t-2 border-black">
-        <span className="font-bold">Total Keseluruhan</span>
-        <span className="font-bold">Rp {total.toLocaleString()}</span>
-      </div>
-      <button 
-        onClick={handlePayment}
-        className="w-full bg-tertiary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-4"
-      >
-        Bayar
-      </button>
-    </div>
+
+      <PaymentModal 
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        orderData={orderData}
+        total={total}
+      />
+    </>
   );
 };
 
@@ -206,10 +216,13 @@ const PaymentPage = () => {
               </div>
             </div>
 
-            {/* Right Column - Order Summary */}
             <div>
-              <OrderSummary subtotal={subtotal} shippingCost={shippingCost} />
-            </div>
+  <OrderSummary 
+    subtotal={subtotal} 
+    shippingCost={shippingCost} 
+    orderData={orderData}  // Menambahkan orderData yang diperlukan
+  />
+</div>
           </div>
         </div>
       </div>
