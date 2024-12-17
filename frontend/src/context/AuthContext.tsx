@@ -70,9 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const synchronizeAuth = (token: string, username: string, userType: string) => {
-    // Set cookies dengan opsi yang lebih spesifik
+    // Set cookies
     const cookieOptions: Cookies.CookieAttributes = { 
-      expires: 7, // 7 hari
+      expires: 7, 
       path: '/',
       sameSite: 'Lax',
       secure: process.env.NODE_ENV === 'production'
@@ -89,7 +89,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set axios header
     api.defaults.headers.common['Authorization'] = `Token ${token}`;
     
-    // Debug log
     console.log('Auth synchronized:', {
       token: Cookies.get('token'),
       username: Cookies.get('username'),
@@ -156,7 +155,6 @@ const clearAuth = () => {
       }
       
       clearAuth();
-      // Arahkan ke halaman yang berbeda berdasarkan userType
       if (currentUserType === 'ADMIN' || currentUserType === 'STAFF') {
         router.push('/admin/login');
       } else {
@@ -198,7 +196,7 @@ const clearAuth = () => {
     </AuthContext.Provider>
   );
 }
-
+// debug
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

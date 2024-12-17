@@ -1,34 +1,96 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { X } from 'lucide-react';
 
 interface CartItem {
-    id: number;
-    name: string;
-    quantity: number;
-    price: number;
-    image: string;
-  }
+  id: number;
+  name: string;
+  quantity: number;
+  price: number;
+  image: string;
+}
 
-const deliveryHours = {
-  weekday: "Monday - Friday: 08.00 AM - 20.00 PM"
+const AuthModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const router = useRouter();
+
+  if (!isOpen) return null;
+
+  const handleRegister = () => {
+    onClose();
+    router.push('/register');
+  };
+
+  const handleLogin = () => {
+    onClose();
+    router.push('/login');
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
+      <div className="relative bg-white rounded-xl p-6 max-w-md w-full mx-4 transform transition-all">
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        
+        <div className="text-center mb-6">
+          <h3 className="text-xl font-bold mb-2">Silahkan Login Terlebih Dahulu</h3>
+          <p className="text-gray-600">
+            Untuk melanjutkan checkout, Anda perlu login atau mendaftar terlebih dahulu.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <button
+            onClick={handleLogin}
+            className="w-full bg-tertiary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors"
+          >
+            Login
+          </button>
+          
+          <button
+            onClick={handleRegister}
+            className="w-full bg-primary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-yellow-500 transition-colors"
+          >
+            Daftar Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-export default function CartPage() {
+const CartPage = () => {
   const { items, updateQuantity, removeItem } = useCart();
+  const { isAuthenticated } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const router = useRouter();
 
   const calculateTotal = () => {
     return items.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    } else {
+      router.push('/datapemesanan');
+    }
+  };
+
   const CartHeader = () => (
     <div className="bg-primary pt-24 pb-16 relative">
       <div className="container mx-auto px-4">
-        {/* Absolute positioned back button */}
         <div className="absolute left-4 z-10">
           <Link href="/menu" className="flex items-center text-black">
             <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
@@ -36,29 +98,11 @@ export default function CartPage() {
           </Link>
         </div>
         
-        {/* Centered title */}
         <div className="flex justify-center items-center mb-8">
           <h1 className="text-4xl font-bold text-black">KERANJANG</h1>
         </div>
       </div>
   
-      <div className="absolute bottom-50 left-0 right-0">
-        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-          <path
-            fill="#000000"
-            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-          />
-        </svg>
-      </div>
-      <div className="absolute -bottom-1 left-0 right-0">
-        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-          <path
-            fill="#F8E6C2"
-            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-          />
-        </svg>
-      </div>
-
       <WaveBorder />
     </div>
   );
@@ -87,7 +131,7 @@ export default function CartPage() {
   const DeliveryInfo = () => (
     <div className="bg-secondary p-4 rounded-xl border-4 border-black mb-8">
       <h2 className="text-center font-bold text-xl">Delivery Hour</h2>
-      <p className="text-center">{deliveryHours.weekday}</p>
+      <p className="text-center">Monday - Friday: 08.00 AM - 20.00 PM</p>
     </div>
   );
 
@@ -116,16 +160,15 @@ export default function CartPage() {
         </div>
       </div>
 
-      {/* Checkout Button */}
       {items.length > 0 && (
         <div className="flex justify-end">
-          <Link 
-            href="/datapemesanan" 
-            className="flex items-center space-x-2 bg-tertiary text-black font-bold py-4 px-8 rounded-xl border-4 border-black hover:bg-yellow-500 transition-colors"
+          <button 
+            onClick={handleCheckout}
+            className="flex items-center space-x-2 bg-tertiary text-black font-bold py-4 px-8 rounded-xl border-4 border-black hover:bg-sky-300 transition-colors"
           >
             <span className="text-xl">CHECKOUT</span>
             <Image src="/direct-right.svg" alt="Next" width={40} height={40} priority />
-          </Link>
+          </button>
         </div>
       )}
     </div>
@@ -184,7 +227,14 @@ export default function CartPage() {
         </div>
       </div>
 
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+
       <Footer />
     </main>
   );
-}
+};
+
+export default CartPage;

@@ -18,7 +18,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Token ${token}`;
     }
-    // Jangan set Content-Type untuk request dengan FormData
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     }
@@ -32,20 +31,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Perbaikan logika penanganan 401
+    // debug 401
     if (error.response?.status === 401 && !error.config.url.includes('login')) {
       const token = Cookies.get('token');
-      // Jika tidak ada token, redirect ke login
+      // kondisi tidak memiliki token
       if (!token) {
         Cookies.remove('token');
         Cookies.remove('username');
         Cookies.remove('userType');
         localStorage.clear();
-        window.location.href = '/login'; // Sesuaikan dengan route login yang benar
+        window.location.href = '/login';
       }
-      // Jika ada token tapi dapat 401, mungkin token expired
+      // kondisi ada token tapi 401
       else {
-        // Hapus token dan redirect ke login
         Cookies.remove('token');
         Cookies.remove('username');
         Cookies.remove('userType');
@@ -141,7 +139,7 @@ export interface TeamMember {
 }
 
   export interface ContactInfo {
-    id: number;  // Tambahkan ini juga
+    id: number;  
     location: string;
     whatsapp_number: string;
     phone_number2: string | null;
@@ -150,8 +148,8 @@ export interface TeamMember {
     weekday_hours: string;
     saturday_hours: string;
     sunday_hours: string;
-    latitude: number | null;  // Tambahkan ini
-    longitude: number | null; // Tambahkan ini
+    latitude: number | null;  
+    longitude: number | null; 
   }
 
   export interface Testimonial {
@@ -196,7 +194,6 @@ export interface TeamMember {
   }
 
   // USER SERVICE
-
   export const userService = {
     getProfile: async () => {
       const token = Cookies.get('token');
@@ -264,7 +261,6 @@ export const authService = {
 
   adminStaffLogin: async (formData: FormDataLogin) => {
     try {
-      // Pastikan endpoint yang benar
       const response = await api.post<LoginResponse>('/auth/admin-login/', {
         username: formData.emailUsername,
         password: formData.password
@@ -383,7 +379,6 @@ export const menuService = {
     }
 
     try {
-      // Log token untuk debugging
       console.log('Using token:', token);
       
       const response = await api.post<Product>('/products/', data, {
@@ -395,7 +390,7 @@ export const menuService = {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
-          // Handle token expiration
+          // Handle token exp
           Cookies.remove('token');
           window.location.href = '/admin/login';
           throw new Error('Session expired. Please login again.');
@@ -413,7 +408,6 @@ export const menuService = {
       const response = await api.put<Product>(`/products/${id}/`, data, {
         headers: {
           'Authorization': `Token ${token}`,
-          // Jangan set Content-Type karena FormData akan menetapkannya secara otomatis
         },
       });
       return response.data;
@@ -444,7 +438,6 @@ export const menuService = {
 
 // About Services
 export const aboutService = {
-  // Timeline Events
   getTimelineEvents: async () => {
     try {
       const response = await api.get<TimelineEvent[]>('/timeline-events/');
@@ -619,7 +612,6 @@ export const aboutService = {
       phone: string;
       message: string;
     }, whatsappNumber: string) => {
-      // Format pesan
       const formattedMessage = `*Pesan dari Website*
   *Nama:* ${data.name}
   *Email:* ${data.email}
@@ -627,14 +619,8 @@ export const aboutService = {
   
   *Pesan:*
   ${data.message}`;
-      
-      // Encode pesan untuk URL
       const encodedMessage = encodeURIComponent(formattedMessage);
-      
-      // Buat URL WhatsApp
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-      
-      // Buka WhatsApp di tab baru
       window.open(whatsappUrl, '_blank');
     }
   };
@@ -643,7 +629,6 @@ export const aboutService = {
   export const testimonialService = {
     getAllTestimonials: async () => {
       try {
-        // Cek token untuk menentukan header
         const token = Cookies.get('token');
         const headers = token ? {
           'Authorization': `Token ${token}`
@@ -658,8 +643,6 @@ export const aboutService = {
         throw error;
       }
     },
-    
-    // Fungsi lainnya tetap membutuhkan token karena untuk admin
     createTestimonial: async (data: FormData) => {
       const token = Cookies.get('token');
       if (!token) {
@@ -771,7 +754,6 @@ export const aboutService = {
       try {
         const response = await api.get('/payments/');
         console.log('API Response:', response.data); // Debug log
-        // Transform data jika perlu
         const payments = response.data.map((payment: any) => ({
           ...payment,
           orderNumber: payment.order_number || 'N/A',
@@ -817,8 +799,6 @@ export const aboutService = {
       try {
         const response = await api.post('/payments/', formData, {
           headers: {
-            // Jangan set Content-Type, biarkan browser yang mengaturnya untuk FormData
-            // 'Content-Type': 'multipart/form-data' // Hapus atau comment line ini
           }
         });
         return response.data;

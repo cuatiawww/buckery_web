@@ -44,7 +44,7 @@ const PreviewMenuItem = ({ item }: { item: Product }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-3 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between shadow-md gap-4 md:gap-0">
+    <div className="bg-primary rounded-2xl p-3 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between shadow-md gap-4 md:gap-0">
       <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
         <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
           <Image
@@ -113,8 +113,6 @@ const PreviewMenu = () => {
   const activeProducts = products.filter(product => 
     product.category === activeCategory
   );
-
-  // Get active category and its description directly from the categories array
   const activeCategory_ = categories.find(cat => cat.id === activeCategory);
   const activeDescription = activeCategory_?.description || "No description available";
 

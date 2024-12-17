@@ -5,14 +5,13 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import Cookies from 'js-cookie';
-import api from '@/services/api';
+// import Cookies from 'js-cookie';
+// import api from '@/services/api';
 
 const AdminDashboard = () => {
   const router = useRouter();
   const { username, userType, isAuthenticated } = useAuth();
   
-  // Tambahkan useEffect untuk pengecekan auth
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
@@ -57,14 +56,14 @@ const AdminDashboard = () => {
     },
     {
       title: 'Contact Info',
-      description: 'Update informasi kontak dan detail perusahaan',
+      description: 'Update informasi kontak dan detail Buckery',
       link: '/admin/contactinfo',
       adminOnly: false,
       icon: '📞'
     },
     {
       title: 'Tentang Kami',
-      description: 'Kelola informasi tim dan perjalanan perusahaan',
+      description: 'Kelola informasi tim dan perjalanan Buckery',
       link: '/admin/about',
       adminOnly: false,
       icon: '👥'
