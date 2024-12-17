@@ -78,11 +78,11 @@ def user_register(request):
                 logger.info("Data validated successfully")
                 user = serializer.save()
                 logger.info(f"User created successfully: {user.username}")
-                token, _ = Token.objects.get_or_create(user=user)  # Create token for user
+                token, _ = Token.objects.get_or_create(user=user)  # buat token for user
                 return Response({
                     'status': 'success',
                     'message': 'Registration successful',
-                    'token': token.key,  # Return token to frontend
+                    'token': token.key,  # Return token ke fe
                     'user': {
                         'username': user.username,
                         'email': user.email,
@@ -143,7 +143,7 @@ def register_staff(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
-@permission_classes([AllowAny])  # Tambahkan ini
+@permission_classes([AllowAny])  
 def admin_staff_login(request):
     username = request.data.get('username')
     password = request.data.get('password')
@@ -183,7 +183,7 @@ def admin_staff_login(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['POST'])
-@permission_classes([IsAdminUser])  # Restrict access to admin only
+@permission_classes([IsAdminUser])  
 def create_staff(request):
     """Create new staff or admin account."""
     try:
@@ -218,7 +218,7 @@ def create_staff(request):
 def list_users(request):
     """List all users with filtering by user_type."""
     try:
-        user_type = request.query_params.get('user_type', None)  # Filter by user_type
+        user_type = request.query_params.get('user_type', None)  
         if user_type:
             users = CustomUser.objects.filter(user_type=user_type)
         else:
@@ -245,8 +245,8 @@ def list_users(request):
             'message': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-@api_view(['GET'])  # Tambahkan ini
-@permission_classes([IsAdminUser])  # Tambahkan ini
+@api_view(['GET'])  
+@permission_classes([IsAdminUser])  
 def list_staff(request):
     """Get list of all staff members (admin only)"""
     try:
@@ -341,7 +341,6 @@ def logout_view(request):
 @permission_classes([IsAuthenticated])
 def user_profile(request):
     try:
-        # Get or create profile
         profile, created = UserProfile.objects.get_or_create(
             user=request.user,
             defaults={

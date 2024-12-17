@@ -8,7 +8,7 @@ import type { Testimonial } from '@/services/api';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { AlertCircle, Loader2, PlusCircle, ArrowLeft, Trash2, Edit, Power } from 'lucide-react';
+import { AlertCircle, Loader2, PlusCircle, ArrowLeft} from 'lucide-react';
 
 export default function TestimonialManagement() {
   const router = useRouter();
@@ -384,7 +384,7 @@ export default function TestimonialManagement() {
                           className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200"
                           disabled={isSubmitting}
                         >
-                          <Edit className="w-4 h-4 mr-1" />
+                    
                           Edit
                         </button>
                         <button
@@ -396,7 +396,7 @@ export default function TestimonialManagement() {
                           }`}
                           disabled={isSubmitting}
                         >
-                          <Power className="w-4 h-4 mr-1" />
+                          
                           {testimonial.is_active ? 'Deactivate' : 'Activate'}
                         </button>
                         <button
@@ -404,7 +404,7 @@ export default function TestimonialManagement() {
                           className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200"
                           disabled={isSubmitting}
                         >
-                          <Trash2 className="w-4 h-4 mr-1" />
+                         
                           Delete
                         </button>
                       </div>

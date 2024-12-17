@@ -404,7 +404,7 @@ export default function ProductManagement() {
                           onClick={() => handleDelete(product.id)}
                           className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200"
                         >
-                          <Trash2 className="w-4 h-4 mr-1" />
+                          
                           Delete
                         </button>
                       </div>

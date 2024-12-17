@@ -9,14 +9,14 @@ class CustomUser(AbstractUser):
         ('STAFF', 'Staff'),
         ('USER', 'Regular User'),
     )
-    
+    # Atribut private/protected
     user_type = models.CharField(
         max_length=10, 
         choices=USER_TYPE_CHOICES, 
         default='USER'
     )
     nama_lengkap = models.CharField(max_length=255)
-
+    # Method ensk
     def save(self, *args, **kwargs):
         if self.user_type == 'ADMIN':
             self.is_staff = True
@@ -28,7 +28,7 @@ class CustomUser(AbstractUser):
             self.is_staff = False
             self.is_superuser = False
         super().save(*args, **kwargs)
-
+    # Method override
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
 
@@ -77,8 +77,14 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True) 
 
+    def save(self, *args, **kwargs):
+        if self.stock < 0:
+            raise ValueError("Stock tidak boleh negatif")
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
+    
     
 # class HeroImage(models.Model):
 #     image = models.ImageField(upload_to='hero/')
@@ -211,7 +217,7 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.order_number} - {self.customer_name}"
-
+    # abstrak
     def save(self, *args, **kwargs):
         if not self.order_number:
             import time

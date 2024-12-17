@@ -114,6 +114,10 @@ DATABASES = {
 }
 AUTH_USER_MODEL = 'api.CustomUser'
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+COVERAGE_REPORT_HTML_OUTPUT_DIR = os.path.join(BASE_DIR, 'coverage')
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
