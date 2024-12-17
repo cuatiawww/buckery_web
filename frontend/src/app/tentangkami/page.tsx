@@ -11,7 +11,7 @@ const TentangKami = () => {
   const [founders, setFounders] = useState<TeamMember[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isVisible, setIsVisible] = useState(true); // Changed to true by default
+  const [isVisible, setIsVisible] = useState(true); 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +21,6 @@ const TentangKami = () => {
       setError(null);
       
       try {
-        // Fetch data sequentially to better handle errors
         const timelineData = await aboutService.getTimelineEvents();
         console.log('Timeline Data:', timelineData);
         // Jika data bukan array, akan dikonversi menjadi array kosong
@@ -46,7 +45,6 @@ const TentangKami = () => {
     fetchData();
   }, []);
 
-  // Show Indcator loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
@@ -55,7 +53,6 @@ const TentangKami = () => {
     );
   }
 
-  // Show indicator error state
   if (error) {
     return (
       <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
@@ -68,16 +65,30 @@ const TentangKami = () => {
   const DEFAULT_IMAGE = '/Pict2.jpg';
 
   return (
-    <main className="min-h-screen bg-yellow-400">
+    <main className="min-h-screen bg-yellow-400 overflow-x-hidden">
       <Navbar />
       
-      {/* Header Section */}
+      {/* Enhanced Header Section */}
       <div className="bg-yellow-400 pt-32 pb-16 relative">
-        {/* Title */}
-        <h1 className="text-4xl font-bold text-center mb-16">TENTANG KAMI</h1>
+        <div className="container mx-auto px-4">
+          {/* Decorative elements */}
+          <div className="absolute top-12 left-8 w-16 h-16 rounded-full bg-tertiary border-4 border-black animate-bounce delay-100"></div>
+          <div className="absolute top-24 right-12 w-12 h-12 rounded-full bg-primary border-4 border-black animate-bounce delay-300"></div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold text-center mb-8 relative">
+            <span className="relative inline-block">
+              TENTANG KAMI
+              <div className="absolute -bottom-2 left-0 w-full h-2 bg-black transform skew-x-12"></div>
+            </span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-center max-w-2xl mx-auto font-ChickenSoup">
+            Cerita manis perjalanan kami dalam membuat setiap momen menjadi lebih istimewa
+          </p>
+        </div>
 
-        {/* Wave Border */}
-        <div className="absolute bottom-50 left-0 right-0">
+       {/* Wave Border */}
+       <div className="absolute bottom-50 left-0 right-0">
           <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
             <path
               fill="#000000"
@@ -95,25 +106,37 @@ const TentangKami = () => {
         </div>
       </div>
 
-      {/* Content Section */}
+      {/* Enhanced Content Section */}
       <div className="bg-primary_bg">
         <div className="container mx-auto px-4 md:px-8 lg:px-16 py-16">
-          {/* Timeline Section */}
+          {/* Timeline Section with Enhanced Animation */}
           <div className="mb-32">
-            <h2 className="text-4xl md:text-6xl font-black text-center mb-16 animate-fade-in">
-              PERJALANAN KAMI
-            </h2>
-            <div className="space-y-24">
+            <div className="relative mb-16">
+              <h2 className="text-4xl md:text-6xl font-black text-center relative z-10">
+                PERJALANAN KAMI
+              </h2>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-48 h-4 bg-tertiary -rotate-2"></div>
+            </div>
+            
+            <div className="space-y-24 relative">
+              {/* Decorative line */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-black hidden md:block"></div>
+              
               {timelineEvents.map((event, index) => (
                 <div 
                   key={index}
-                  className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-8 md:gap-16 opacity-0 transition-all duration-1000 ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'translate-y-20'
-                  }`}
-                  style={{ transitionDelay: `${index * 200}ms` }}
+                  className={`flex flex-col ${
+                    index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                  } items-center gap-8 md:gap-16 relative`}
                 >
-                  <div className="md:w-1/2">
-                    <div className="relative rounded-3xl overflow-hidden border-4 border-black shadow-xl hover:scale-[1.02] transition-transform duration-300">
+                  {/* Timeline dot */}
+                  <div className="hidden md:block absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-6 h-6 rounded-full bg-tertiary border-4 border-black"></div>
+                  </div>
+                  
+                  <div className="md:w-1/2 transform transition-all duration-500 hover:scale-105">
+                    <div className="relative rounded-3xl overflow-hidden border-4 border-black shadow-xl">
+                      <div className="absolute inset-0 bg-black/20 transition-opacity duration-300 opacity-0 hover:opacity-100"></div>
                       <Image
                         src={event.image || DEFAULT_IMAGE}
                         alt={event.title}
@@ -123,9 +146,10 @@ const TentangKami = () => {
                       />
                     </div>
                   </div>
+                  
                   <div className="md:w-1/2">
-                    <div className="bg-primary p-8 rounded-3xl border-4 border-black shadow-lg relative">
-                      <div className="absolute -top-6 left-8 bg-secondary px-6 py-2 rounded-full border-4 border-black font-black text-xl">
+                    <div className="bg-primary p-8 rounded-3xl border-4 border-black shadow-lg relative transform transition-all duration-500 hover:-translate-y-2">
+                      <div className="absolute -top-6 left-8 bg-secondary px-6 py-2 rounded-full border-4 border-black font-black text-xl transform rotate-2">
                         {event.year}
                       </div>
                       <h3 className="text-2xl font-black mb-4 mt-2">{event.title}</h3>
@@ -139,22 +163,28 @@ const TentangKami = () => {
             </div>
           </div>
 
-          {/* Founders Section */}
-          <div className="mb-32">
-            <h2 className="text-4xl md:text-6xl font-black text-center mb-16">
-              PENDIRI BUCKERY
-            </h2>
+          {/* Enhanced Founders Section */}
+          <div className="mb-32 relative">
+            {/* Decorative elements */}
+            <div className="absolute -top-8 left-4 w-20 h-20 bg-tertiary rounded-full border-4 border-black -rotate-12"></div>
+            <div className="absolute -top-12 right-8 w-16 h-16 bg-primary rounded-full border-4 border-black rotate-12"></div>
+            
+            <div className="relative mb-16">
+              <h2 className="text-4xl md:text-6xl font-black text-center relative z-10">
+                PENDIRI BUCKERY
+              </h2>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-64 h-4 bg-secondary rotate-1"></div>
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-8">
               {founders.map((founder, index) => (
-                <div 
-                  key={index}
-                  className={`transform transition-all duration-1000 delay-${index * 200} ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
-                  }`}
-                >
-                  <div className="bg-secondary p-8 rounded-3xl border-4 border-black shadow-lg hover:scale-[1.02] transition-transform duration-300">
+                <div key={index} className="transform transition-all duration-500 hover:-translate-y-2">
+                  <div className="bg-secondary p-8 rounded-3xl border-4 border-black shadow-lg relative">
+                    {/* Decorative corner */}
+                    <div className="absolute -top-4 -right-4 w-8 h-8 bg-tertiary border-4 border-black rounded-full"></div>
+                    
                     <div className="flex flex-col md:flex-row items-center gap-6">
-                      <div className="w-40 h-40 rounded-2xl overflow-hidden border-4 border-black flex-shrink-0">
+                      <div className="w-40 h-40 rounded-2xl overflow-hidden border-4 border-black flex-shrink-0 transform transition-transform duration-300 hover:rotate-3">
                         <div className="relative w-full h-full">
                           <Image
                             src={founder.image || DEFAULT_IMAGE}
@@ -166,8 +196,16 @@ const TentangKami = () => {
                       </div>
                       <div className="flex-1 text-center md:text-left">
                         <h3 className="text-2xl font-black mb-2">{founder.name}</h3>
-                        <p className="text-lg font-ChickenSoup mb-4">{founder.role}</p>
-                        <p className="text-xl font-ChickenSoup italic">{founder.quote}</p>
+                        <p className="text-lg font-ChickenSoup mb-4">
+                          <span className="bg-primary px-3 py-1 rounded-full inline-block">
+                            {founder.role}
+                          </span>
+                        </p>
+                        <p className="text-xl font-ChickenSoup italic relative">
+                          `{founder.quote}`
+                          <span className="absolute -top-4 -left-4 text-4xl text-tertiary">`</span>
+                          <span className="absolute -bottom-4 -right-4 text-4xl text-tertiary">`</span>
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -176,21 +214,26 @@ const TentangKami = () => {
             </div>
           </div>
 
-          {/* Team Section */}
-          <div className="mt-24">
-            <h2 className="text-4xl md:text-6xl font-black text-center mb-16">
-              TIM KAMI
-            </h2>
-            <div className="grid grid-cols-2 gap-8">
+          {/* Enhanced Team Section */}
+          <div className="relative">
+            <div className="relative mb-16">
+              <h2 className="text-4xl md:text-6xl font-black text-center relative z-10">
+                TIM KAMI
+              </h2>
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-40 h-4 bg-tertiary -rotate-1"></div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
               {teamMembers.map((member, index) => (
                 <div 
                   key={index}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 200}ms` }}
+                  className="transform transition-all duration-500 hover:-translate-y-2 hover:rotate-2"
                 >
-                  <div className="bg-primary p-6 rounded-3xl border-4 border-black shadow-lg hover:scale-105 transition-transform duration-300">
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                      <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-black">
+                  <div className="bg-primary p-6 rounded-3xl border-4 border-black shadow-lg relative">
+                    <div className="absolute -top-3 -right-3 w-6 h-6 bg-secondary border-4 border-black rounded-full"></div>
+                    
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-black mb-4">
                         <div className="relative w-full h-full">
                           <Image
                             src={member.image || DEFAULT_IMAGE}
@@ -200,10 +243,12 @@ const TentangKami = () => {
                           />
                         </div>
                       </div>
-                      <div className="flex-1 text-center md:text-left">
-                        <h3 className="text-xl font-black mb-2">{member.name}</h3>
-                        <p className="text-lg font-ChickenSoup">{member.role}</p>
-                      </div>
+                      <h3 className="text-xl font-black mb-2">{member.name}</h3>
+                      <p className="text-lg font-ChickenSoup">
+                        <span className="bg-secondary px-3 py-1 rounded-full inline-block">
+                          {member.role}
+                        </span>
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -82,6 +82,9 @@ const HeroSection = () => {
   return (
     <main className="min-h-screen bg-primary relative overflow-hidden">
       {/* Background decorations */}
+      {/* Decorative elements */}
+      <div className="absolute top-12 left-8 w-16 h-16 rounded-full bg-tertiary border-4 border-black animate-bounce delay-100"></div>
+      <div className="absolute top-24 right-12 w-12 h-12 rounded-full bg-primary border-4 border-black animate-bounce delay-300"></div>
       
       {/* Main content */}
       <div className="container mx-auto px-4 md:px-8 lg:px-16 pt-12 md:pt-24">

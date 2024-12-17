@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { X } from 'lucide-react';
+import { X, ShoppingCart } from 'lucide-react';
 
 interface CartItem {
   id: number;
@@ -35,17 +35,20 @@ const AuthModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-      <div className="relative bg-white rounded-xl p-6 max-w-md w-full mx-4 transform transition-all">
+      <div className="relative bg-primary rounded-3xl p-8 max-w-md w-full mx-4 transform transition-all border-4 border-black">
+        {/* Decorative corner */}
+        <div className="absolute -top-4 -right-4 w-8 h-8 bg-tertiary border-4 border-black rounded-full"></div>
+        
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full"
+          className="absolute top-4 right-4 p-2 hover:bg-secondary rounded-full border-2 border-black transition-all duration-300"
         >
           <X className="w-6 h-6" />
         </button>
         
-        <div className="text-center mb-6">
-          <h3 className="text-xl font-bold mb-2">Silahkan Login Terlebih Dahulu</h3>
-          <p className="text-gray-600">
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-black mb-3">Silahkan Login Terlebih Dahulu</h3>
+          <p className="text-lg font-ChickenSoup">
             Untuk melanjutkan checkout, Anda perlu login atau mendaftar terlebih dahulu.
           </p>
         </div>
@@ -53,14 +56,14 @@ const AuthModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
         <div className="space-y-4">
           <button
             onClick={handleLogin}
-            className="w-full bg-tertiary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors"
+            className="w-full bg-tertiary text-black font-black py-3 px-4 rounded-xl border-4 border-black hover:bg-sky-300 transition-all duration-300 hover:-translate-y-1 transform"
           >
             Login
           </button>
           
           <button
             onClick={handleRegister}
-            className="w-full bg-primary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-yellow-500 transition-colors"
+            className="w-full bg-secondary text-black font-black py-3 px-4 rounded-xl border-4 border-black hover:bg-yellow-500 transition-all duration-300 hover:-translate-y-1 transform"
           >
             Daftar Sekarang
           </button>
@@ -89,17 +92,26 @@ const CartPage = () => {
   };
 
   const CartHeader = () => (
-    <div className="bg-primary pt-24 pb-16 relative">
+    <div className="bg-yellow-400 pt-32 pb-16 relative">
       <div className="container mx-auto px-4">
-        <div className="absolute left-4 z-10">
-          <Link href="/menu" className="flex items-center text-black">
-            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
-            <span className="text-xl font-bold hidden md:block">KEMBALI</span>
+        {/* Decorative elements */}
+        <div className="absolute top-12 left-8 w-16 h-16 rounded-full bg-tertiary border-4 border-black animate-bounce delay-100"></div>
+        <div className="absolute top-24 right-12 w-12 h-12 rounded-full bg-primary border-4 border-black animate-bounce delay-300"></div>
+
+        <div className="flex justify-between items-center">
+          <Link href="/menu" className="flex items-center text-black hover:scale-105 transition-transform">
+            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority className="transform hover:-translate-x-2 transition-transform" />
+            <span className="text-xl font-black hidden md:block">KEMBALI</span>
           </Link>
-        </div>
-        
-        <div className="flex justify-center items-center mb-8">
-          <h1 className="text-4xl font-bold text-black">KERANJANG</h1>
+          
+          <h1 className="text-5xl md:text-7xl font-black text-black relative">
+            <span className="relative inline-block">
+              KERANJANG
+              <div className="absolute -bottom-2 left-0 w-full h-2 bg-black transform skew-x-12"></div>
+            </span>
+          </h1>
+
+          <div className="w-24 md:w-32"></div> {/* Spacer for centering */}
         </div>
       </div>
   
@@ -129,34 +141,49 @@ const CartPage = () => {
   );
 
   const DeliveryInfo = () => (
-    <div className="bg-secondary p-4 rounded-xl border-4 border-black mb-8">
-      <h2 className="text-center font-bold text-xl">Delivery Hour</h2>
-      <p className="text-center">Monday - Friday: 08.00 AM - 20.00 PM</p>
+    <div className="bg-secondary p-6 rounded-3xl border-4 border-black mb-12 transform transition-all duration-500 hover:-translate-y-2 relative">
+      {/* Decorative corner */}
+      <div className="absolute -top-4 -right-4 w-8 h-8 bg-tertiary border-4 border-black rounded-full"></div>
+      
+      <div className="flex items-center justify-center space-x-4">
+        <div>
+        <h2 className="text-center font-bold text-xl">Delivery Hour</h2>
+        <p className="text-center">Monday - Friday: 08.00 AM - 20.00 PM</p>
+        </div>
+      </div>
     </div>
   );
 
   const CartItems = () => (
     <div className="space-y-8">
-      <div className="bg-white rounded-xl border-4 border-black overflow-hidden">
-        <div className="grid grid-cols-3 bg-tertiary p-4 font-bold text-xl">
-          <div>PRODUK</div>
+      <div className="bg-white rounded-[32px] border-4 border-black overflow-hidden transform transition-all duration-500 hover:-translate-y-2 relative">
+        {/* Decorative corner */}
+        <div className="absolute -top-4 -right-4 w-8 h-8 bg-secondary border-4 border-black rounded-full"></div>
+
+        <div className="grid grid-cols-3 bg-[#9CD7E3] px-6 py-4 font-ChickenSoup text-xl border-b-4 border-black">
+          <div className="pl-4">PRODUK</div>
           <div className="text-center">JUMLAH</div>
-          <div className="text-right">SUB TOTAL</div>
+          <div className="text-right pr-4">SUB TOTAL</div>
         </div>
 
         {items.length > 0 ? (
-          items.map((item) => (
-            <CartItemRow key={item.id} item={item} />
-          ))
+          <div className="divide-y-4 divide-black">
+            {items.map((item) => (
+              <CartItemRow key={item.id} item={item} />
+            ))}
+          </div>
         ) : (
-          <div className="p-8 text-center text-gray-500">
-            Keranjang belanja Anda masih kosong
+          <div className="p-12 text-center">
+            <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <p className="text-xl font-ChickenSoup text-gray-500">
+              Keranjang belanja Anda masih kosong
+            </p>
           </div>
         )}
 
-        <div className="grid grid-cols-3 bg-tertiary p-4 font-bold text-xl">
-          <div className="col-span-2">TOTAL</div>
-          <div className="text-right">Rp {calculateTotal().toLocaleString()}</div>
+        <div className="grid grid-cols-3 bg-[#9CD7E3] px-6 py-4 font-ChickenSoup text-xl border-t-4 border-black">
+          <div className="col-span-2 pl-4">TOTAL</div>
+          <div className="text-right pr-4">Rp {calculateTotal().toLocaleString()}</div>
         </div>
       </div>
 
@@ -164,10 +191,17 @@ const CartPage = () => {
         <div className="flex justify-end">
           <button 
             onClick={handleCheckout}
-            className="flex items-center space-x-2 bg-tertiary text-black font-bold py-4 px-8 rounded-xl border-4 border-black hover:bg-sky-300 transition-colors"
+            className="flex items-center space-x-4 bg-tertiary text-black font-ChickenSoup py-4 px-8 rounded-xl border-4 border-black hover:bg-sky-300 transition-all duration-300 hover:-translate-y-2 transform"
           >
             <span className="text-xl">CHECKOUT</span>
-            <Image src="/direct-right.svg" alt="Next" width={40} height={40} priority />
+            <Image 
+              src="/direct-right.svg" 
+              alt="Next" 
+              width={40} 
+              height={40} 
+              priority 
+              className="transform transition-transform group-hover:translate-x-2"
+            />
           </button>
         </div>
       )}
@@ -175,9 +209,9 @@ const CartPage = () => {
   );
 
   const CartItemRow = ({ item }: { item: CartItem }) => (
-    <div className="grid grid-cols-3 items-center p-4 bg-yellow-400 border-t-4 border-black">
-      <div className="flex items-center space-x-4">
-        <div className="w-20 h-20 relative">
+    <div className="grid grid-cols-3 items-center px-6 py-4 bg-[#FFD233]">
+      <div className="flex items-center gap-4 pl-4">
+        <div className="w-16 h-16 md:w-20 md:h-20 relative flex-shrink-0">
           <Image
             src={item.image}
             alt={item.name}
@@ -185,39 +219,39 @@ const CartPage = () => {
             className="object-cover rounded-lg border-2 border-black"
           />
         </div>
-        <span className="font-bold">{item.name}</span>
+        <span className="font-ChickenSoup text-base md:text-lg truncate">{item.name}</span>
       </div>
       
-      <div className="flex items-center justify-center space-x-4">
+      <div className="flex items-center justify-center gap-2 md:gap-4">
         <button
           onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
-          className="w-8 h-8 bg-white rounded-full border-2 border-black flex items-center justify-center"
+          className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full border-2 border-black flex items-center justify-center font-ChickenSoup hover:bg-tertiary transition-colors"
         >
           -
         </button>
-        <span className="font-bold">{item.quantity}x</span>
+        <span className="font-ChickenSoup text-lg md:text-xl">{item.quantity}x</span>
         <button 
           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-          className="w-8 h-8 bg-white rounded-full border-2 border-black flex items-center justify-center"
+          className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full border-2 border-black flex items-center justify-center font-ChickenSoup hover:bg-tertiary transition-colors"
         >
           +
         </button>
         <button 
           onClick={() => removeItem(item.id)}
-          className="px-4 py-1 bg-red-200 rounded-lg border-2 border-black"
+          className="px-3 py-1 md:px-4 md:py-2 bg-[#FFB6B6] rounded-xl border-2 border-black font-ChickenSoup text-sm md:text-base hover:bg-red-300 transition-colors"
         >
           Delete
         </button>
       </div>
       
-      <div className="text-right font-bold">
+      <div className="text-right pr-4 font-ChickenSoup text-lg md:text-xl">
         Rp {(item.price * item.quantity).toLocaleString()}
       </div>
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-yellow-400">
+    <main className="min-h-screen bg-yellow-400 overflow-x-hidden">
       <CartHeader />
       
       <div className="bg-primary_bg">

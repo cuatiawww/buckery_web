@@ -111,23 +111,29 @@ const Page = () => {
     );
   }
   const OrderDataHeader = () => (
-    <div className="bg-primary pt-24 pb-16 relative">
+    <div className="bg-yellow-400 pt-32 pb-16 relative">
       <div className="container mx-auto px-4">
-        {/* Absolute positioned back button */}
-        <div className="absolute left-4 z-10">
-          <Link href="/keranjang" className="flex items-center text-black">
-            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
-            <span className="text-xl font-bold hidden md:block">KEMBALI</span>
+        {/* Decorative elements */}
+        <div className="absolute top-12 left-8 w-16 h-16 rounded-full bg-tertiary border-4 border-black animate-bounce delay-100"></div>
+        <div className="absolute top-24 right-12 w-12 h-12 rounded-full bg-primary border-4 border-black animate-bounce delay-300"></div>
+
+        <div className="flex justify-between items-center">
+          <Link href="/keranjang" className="flex items-center text-black hover:scale-105 transition-transform">
+            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority className="transform hover:-translate-x-2 transition-transform" />
+            <span className="text-xl font-black hidden md:block">KEMBALI</span>
           </Link>
-        </div>
-        
-        {/* Centered title */}
-        <div className="flex justify-center items-center mb-8">
-          <h1 className="text-4xl font-bold text-black">Data Pemesanan</h1>
+          
+          <h1 className="text-5xl md:text-7xl font-black text-black relative">
+            <span className="relative inline-block">
+              DATA PEMESANAN
+              <div className="absolute -bottom-2 left-0 w-full h-2 bg-black transform skew-x-12"></div>
+            </span>
+          </h1>
+
+          <div className="w-24 md:w-32"></div> {/* Spacer for centering */}
         </div>
       </div>
-  
-      {/* Wave Border */}
+
       <div className="absolute bottom-50 left-0 right-0">
         <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
           <path
@@ -148,136 +154,151 @@ const Page = () => {
   );
 
   return (
-    <main className="min-h-screen bg-yellow-400">
+    <main className="min-h-screen bg-yellow-400 overflow-x-hidden">
       <Navbar />
       <OrderDataHeader />
       
-      {/* Main Content */}
       <div className="bg-primary_bg">
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-yellow-400 rounded-3xl border-4 border-black p-6">
+        <div className="container mx-auto px-4 py-16">
+          <div className="bg-primary rounded-[32px] border-4 border-black p-8 transform transition-all duration-500 hover:-translate-y-2 relative">
+            {/* Decorative corner */}
+            <div className="absolute -top-4 -right-4 w-8 h-8 bg-tertiary border-4 border-black rounded-full"></div>
+            
             {error && (
-              <div className="mb-4 p-4 bg-red-100 border-2 border-red-400 text-red-700 rounded-lg">
+              <div className="mb-6 p-4 bg-red-200 border-4 border-black text-black rounded-xl font-ChickenSoup">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid gap-8">
-                {/* Form Fields */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block font-bold mb-2">Nama Lengkap</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black"
-                      placeholder="Nama lengkap sesuai profil"
-                      required
-                    />
+                {/* Personal Information Section */}
+                <div className="space-y-6">
+                  <div className="relative mb-8">
+                    <h2 className="text-3xl font-black relative z-10">DATA DIRI</h2>
+                    <div className="absolute -bottom-2 left-0 w-32 h-4 bg-tertiary -rotate-1"></div>
                   </div>
 
-                  <div>
-                    <label className="block font-bold mb-2">No. Telepon</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black"
-                      placeholder="Nomor telepon sesuai profil"
-                      required
-                    />
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block font-black mb-2">Nama Lengkap</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border-4 border-black font-ChickenSoup text-lg focus:ring-2 focus:ring-tertiary transition-transform hover:scale-101"
+                        placeholder="Nama lengkap sesuai profil"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-black mb-2">No. Telepon</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border-4 border-black font-ChickenSoup text-lg focus:ring-2 focus:ring-tertiary transition-transform hover:scale-101"
+                        placeholder="Nomor telepon sesuai profil"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-black mb-2">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 rounded-xl border-4 border-black font-ChickenSoup text-lg focus:ring-2 focus:ring-tertiary transition-transform hover:scale-101"
+                        placeholder="Email sesuai profil"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-black mb-2">Alamat</label>
+                      <textarea
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        rows={4}
+                        className="w-full px-4 py-3 rounded-xl border-4 border-black font-ChickenSoup text-lg focus:ring-2 focus:ring-tertiary transition-transform hover:scale-101 resize-none"
+                        placeholder="Alamat pengiriman sesuai profil"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-black mb-2">Catatan</label>
+                      <textarea
+                        name="notes"
+                        value={formData.notes}
+                        onChange={handleInputChange}
+                        rows={4}
+                        className="w-full px-4 py-3 rounded-xl border-4 border-black font-ChickenSoup text-lg focus:ring-2 focus:ring-tertiary transition-transform hover:scale-101 resize-none"
+                        placeholder="Catatan tambahan untuk pesanan"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delivery Section */}
+                <div className="space-y-6">
+                  <div className="relative mb-8">
+                    <h2 className="text-3xl font-black relative z-10">PENGIRIMAN</h2>
+                    <div className="absolute -bottom-2 left-0 w-40 h-4 bg-secondary -rotate-1"></div>
                   </div>
 
-                  <div>
-                    <label className="block font-bold mb-2">Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black"
-                      placeholder="Email sesuai profil"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Alamat</label>
-                    <textarea
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      rows={4}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black resize-none"
-                      placeholder="Alamat pengiriman sesuai profil"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Catatan</label>
-                    <textarea
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      rows={4}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black resize-none"
-                      placeholder="Catatan tambahan untuk pesanan"
-                    />
+                  <div className="bg-[#9CD7E3] rounded-xl border-4 border-black p-6">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full bg-white px-6 py-4 rounded-xl border-4 border-black flex justify-between items-center font-ChickenSoup text-lg hover:bg-gray-50 transition-colors"
+                      >
+                        {formData.deliveryMethod ? 
+                          deliveryOptions.find(opt => opt.id === formData.deliveryMethod)?.label : 
+                          'Pilih metode pengiriman'}
+                        <ChevronDown className={`w-6 h-6 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
+                      </button>
+                      
+                      {isDropdownOpen && (
+                        <div className="absolute w-full mt-2 bg-white rounded-xl border-4 border-black overflow-hidden z-10">
+                          {deliveryOptions.map((option) => (
+                            <button
+                              type="button"
+                              key={option.id}
+                              onClick={() => handleDeliverySelect(option.id)}
+                              className="w-full px-6 py-4 text-left font-ChickenSoup text-lg hover:bg-tertiary transition-colors"
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-               {/* Delivery Options */}
- <div className="bg-sky-200 rounded-xl border-2 border-black p-4">
- <h3 className="font-bold text-xl mb-4">Pilih Pengiriman</h3>
- <div className="relative">
-   <button
-     type="button"
-     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-     className="w-full bg-white px-4 py-3 rounded-xl border-2 border-black flex justify-between items-center font-bold"
-   >
-     {formData.deliveryMethod ? 
-       deliveryOptions.find(opt => opt.id === formData.deliveryMethod)?.label : 
-       'Pilih metode pengiriman'}
-     <ChevronDown className={`w-5 h-5 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`} />
-   </button>
-   
-   {isDropdownOpen && (
-     <div className="absolute w-full mt-2 bg-white rounded-xl border-2 border-black overflow-hidden z-10">
-       {deliveryOptions.map((option) => (
-         <button
-           type="button"
-           key={option.id}
-           onClick={() => handleDeliverySelect(option.id)}
-           className="w-full px-4 py-3 text-left font-bold hover:bg-sky-100 transition-colors"
-         >
-           {option.label}
-         </button>
-       ))}
-     </div>
-   )}
- </div>
-</div>
-
-{/* Submit Button */}
-<div className="flex justify-end">
- <button
-   type="submit"
-   disabled={!formData.deliveryMethod}
-   className={`flex items-center space-x-2 px-8 py-4 rounded-xl border-4 border-black font-bold text-xl transition-colors
-     ${formData.deliveryMethod ? 
-       'bg-tertiary hover:bg-primary text-black' : 
-       'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
- >
-   <span>LANJUT KE PEMBAYARAN</span>
-   <ArrowRight className="w-6 h-6" />
- </button>
-</div>
+              {/* Submit Button */}
+              <div className="flex justify-end pt-6">
+                <button
+                  type="submit"
+                  disabled={!formData.deliveryMethod}
+                  className={`flex items-center space-x-4 px-8 py-4 rounded-xl border-4 border-black font-ChickenSoup text-xl transition-all duration-300 hover:-translate-y-2 transform
+                    ${formData.deliveryMethod ? 
+                      'bg-tertiary hover:bg-secondary text-black' : 
+                      'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
+                >
+                  <span>LANJUT KE PEMBAYARAN</span>
+                  <ArrowRight className="w-6 h-6" />
+                </button>
+              </div>
             </form>
           </div>
         </div>
