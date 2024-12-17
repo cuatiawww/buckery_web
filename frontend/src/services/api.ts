@@ -284,7 +284,6 @@ export const authService = {
       });
     } catch (error) {
       console.error('Logout error:', error);
-      // Re-throw untuk handling di AuthContext
       throw error;
     }
   }

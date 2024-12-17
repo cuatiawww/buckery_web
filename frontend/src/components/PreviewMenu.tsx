@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -38,41 +39,46 @@ const PreviewMenuItem = ({ item }: { item: Product }) => {
       setQuantity(prev => prev - 1);
     }
   };
+
   const getImageSrc = (imageUrl: string | null | undefined): string => {
     if (!imageUrl) return '/roti.png';
     return imageUrl.startsWith('http') ? imageUrl : '/roti.png';
   };
 
   return (
-    <div className="bg-primary rounded-2xl p-3 md:p-4 flex flex-col md:flex-row items-start md:items-center justify-between shadow-md gap-4 md:gap-0">
-      <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
-        <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+    <div className="bg-primary rounded-2xl border-4 border-black p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 hover:bg-secondary transition-colors relative">
+      {/* Decorative dot */}
+      <div className="absolute -top-2 -right-2 w-4 h-4 bg-tertiary rounded-full border-2 border-black"></div>
+      
+      <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="relative w-20 h-20 flex-shrink-0">
           <Image
             src={getImageSrc(item.image)}
             alt={item.name}
             fill
-            className="rounded-xl object-cover"
+            className="rounded-xl border-4 border-black object-cover"
           />
         </div>
-        <span className="text-lg md:text-xl font-bold">{item.name}</span>
+        <span className="font-black text-xl">{item.name}</span>
       </div>
-      <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto justify-between md:justify-end">
-        <div className="flex items-center gap-2">
+      
+      <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+        <div className="flex items-center gap-3">
           <button 
             onClick={handleIncrement}
-            className="bg-[#87CEEB] p-1.5 md:p-2 rounded-lg hover:bg-[#87CEEB]/80 transition-colors"
+            className="bg-tertiary hover:bg-primary p-2 rounded-xl border-4 border-black transition-colors"
           >
-            <Plus size={18} />
+            <Plus className="w-5 h-5" />
           </button>
-          <span className="text-lg md:text-xl font-medium min-w-[20px] text-center">{quantity}</span>
+          <span className="font-black text-xl min-w-[24px] text-center">{quantity}</span>
           <button 
             onClick={handleDecrement}
-            className="bg-[#98FB98] p-1.5 md:p-2 rounded-lg hover:bg-[#98FB98]/80 transition-colors"
+            className="bg-secondary hover:bg-primary p-2 rounded-xl border-4 border-black transition-colors"
           >
-            <Minus size={18} />
+            <Minus className="w-5 h-5" />
           </button>
         </div>
-        <span className="text-lg md:text-xl font-bold min-w-[100px] md:min-w-[120px] text-right">
+        <span className="font-black text-xl min-w-[120px] text-right">
           Rp {item.price.toLocaleString()}
         </span>
       </div>
@@ -100,7 +106,6 @@ const PreviewMenu = () => {
           setActiveCategory(categoriesData[0].id);
         }
         setLoading(false);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError('Failed to load menu data');
         setLoading(false);
@@ -117,27 +122,53 @@ const PreviewMenu = () => {
   const activeDescription = activeCategory_?.description || "No description available";
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="space-y-4 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <div className="h-3 w-3 bg-primary rounded-full animate-bounce border-2 border-black"></div>
+            <div className="h-3 w-3 bg-secondary rounded-full animate-bounce delay-100 border-2 border-black"></div>
+            <div className="h-3 w-3 bg-tertiary rounded-full animate-bounce delay-200 border-2 border-black"></div>
+          </div>
+          <p className="font-ChickenSoup text-xl">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="bg-red-400 rounded-2xl border-4 border-black p-6">
+          <p className="font-ChickenSoup text-xl text-center">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-4xl md:text-6xl font-black text-center mb-6 md:mb-8">KATEGORIZZZ</h2>
+      <div className="relative text-center mb-8">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-1/4 w-12 h-12 bg-tertiary rounded-full border-4 border-black -rotate-12"></div>
+        <div className="absolute top-8 right-1/4 w-8 h-8 bg-primary rounded-full border-4 border-black rotate-12"></div>
+        
+        <h2 className="text-6xl font-black relative inline-block">
+          KATEGORIZZZ
+          <div className="absolute -bottom-2 left-0 w-full h-2 bg-black transform skew-x-12"></div>
+        </h2>
+      </div>
       
       {/* Category Buttons */}
-      <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mb-6 md:mb-8 px-4">
+      <div className="flex flex-wrap justify-center gap-6 mb-12 px-4">
         {categories.map((category) => (
           <button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}
-            className={`px-8 md:px-16 py-3 md:py-4 rounded-full text-xl md:text-2xl font-bold transition-all duration-300 border-4 border-black shadow-lg transform hover:-translate-y-1 ${
+            className={`px-12 py-4 rounded-full text-2xl font-black transition-all duration-300 border-4 border-black transform hover:-translate-y-1 ${
               activeCategory === category.id
-                ? 'bg-secondary text-black'
-                : 'bg-primary text-black hover:bg-secondary'
+                ? 'bg-tertiary'
+                : 'bg-primary hover:bg-secondary'
             }`}
           >
             {category.name}
@@ -146,18 +177,32 @@ const PreviewMenu = () => {
       </div>
 
       {/* Content Section */}
-      <div className="py-6 md:py-12 px-4 md:px-0">
-        <div className="bg-[#FFD700] rounded-3xl p-4 md:p-8 shadow-lg border-4 border-black">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {/* Description */}
-            <div className="flex items-center order-2 md:order-1">
-              <p className="text-xl md:text-2xl font-ChickenSoup leading-relaxed">
+      <div className="px-4">
+        <div className="bg-primary rounded-3xl border-4 border-black p-8 relative">
+          {/* Decorative elements */}
+          <div className="absolute -top-6 -right-6 w-12 h-12 bg-tertiary rounded-full border-4 border-black rotate-12"></div>
+          <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-secondary rounded-full border-4 border-black -rotate-12"></div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Description with Image */}
+            <div className="bg-secondary rounded-2xl border-4 border-black p-6 relative">
+              {/* Image container */}
+              <div className="relative w-full h-[300px] mb-6 rounded-xl border-4 border-black overflow-hidden">
+                <Image
+                  src="/ilust4.jpg" 
+                  alt="Category preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              {/* Description text */}
+              <p className="font-ChickenSoup text-2xl leading-relaxed">
                 {activeDescription}
               </p>
             </div>
 
             {/* Menu Items */}
-            <div className="max-h-[400px] md:max-h-[500px] overflow-y-auto pr-2 md:pr-4 space-y-3 md:space-y-4 custom-scrollbar order-1 md:order-2">
+            <div className="max-h-[600px] overflow-y-auto pr-4 space-y-4 scrollbar-hide">
               {activeProducts.map((item) => (
                 <PreviewMenuItem key={item.id} item={item} />
               ))}

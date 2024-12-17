@@ -171,21 +171,17 @@ class Payment(models.Model):
         ('qris', 'QRIS'),
     )
 
-    # Order Info
     order_number = models.CharField(max_length=50, unique=True, null=True, blank=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     
-    # Customer Info
     customer_name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20)
     email = models.EmailField()
     address = models.TextField()
-    
-    # Order Details
+
     items = models.JSONField(default=dict) 
     total = models.DecimalField(max_digits=10, decimal_places=2)
     
-    # Payment Info
     payment_method = models.CharField(
         max_length=10, 
         choices=PAYMENT_METHOD_CHOICES,

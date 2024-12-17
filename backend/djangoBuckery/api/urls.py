@@ -7,7 +7,7 @@ from .views import (
     TeamMemberViewSet,
     ContactInformationViewSet,
     TestimonialViewSet,
-    PaymentViewSet,  # Add this
+    PaymentViewSet,  
     user_login,
     user_register,
     admin_staff_login,
@@ -49,7 +49,6 @@ urlpatterns = [
     # User profile
     path('user/profile/', user_profile, name='user-profile'),
     
-    # Payment specific endpoints (if needed)
     path('payments/<int:pk>/confirm/', PaymentViewSet.as_view({'post': 'confirm_payment'}), name='confirm-payment'),
     path('payments/<int:pk>/reject/', PaymentViewSet.as_view({'post': 'reject_payment'}), name='reject-payment'),
 ]

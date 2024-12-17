@@ -4,11 +4,11 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import Image from 'next/image';
-import Link from 'next/link';
+// import Image from 'next/image';
+// import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, UserCircle } from 'lucide-react';
 import api, { userService } from '@/services/api';
 import type { UserProfile } from '@/services/api';
 import Cookies from 'js-cookie';
@@ -168,23 +168,37 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen bg-yellow-400">
+    <main className="min-h-screen bg-yellow-400 overflow-x-hidden">
       <Navbar />
       
-      <div className="bg-primary pt-24 pb-16 relative">
-        <div className="container mx-auto px-4 flex justify-between items-center mb-8">
-          <Link href="/" className="flex items-center text-black">
-            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
-            <span className="text-xl font-bold">KEMBALI</span>
-          </Link>
+      {/* Enhanced Header Section */}
+      <div className="bg-yellow-400 pt-32 pb-16 relative">
+        <div className="container mx-auto px-4">
+          {/* Decorative elements */}
+          <div className="absolute top-12 left-8 w-16 h-16 rounded-full bg-tertiary border-4 border-black animate-bounce delay-100"></div>
+          <div className="absolute top-24 right-12 w-12 h-12 rounded-full bg-primary border-4 border-black animate-bounce delay-300"></div>
           
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-black">Profil Saya</h1>
-          </div>
+          <h1 className="text-5xl md:text-7xl font-bold text-center mb-8 relative">
+            <span className="relative inline-block">
+              PROFIL SAYA
+              <div className="absolute -bottom-2 left-0 w-full h-2 bg-black transform skew-x-12"></div>
+            </span>
+          </h1>
           
-          <div className="w-[144px]" />
+          <p className="text-xl md:text-2xl text-center max-w-2xl mx-auto font-ChickenSoup">
+            Kelola informasi profil Anda di sini
+          </p>
         </div>
 
+        {/* Wave Border */}
+        <div className="absolute bottom-50 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+            <path
+              fill="#000000"
+              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+            />
+          </svg>
+        </div>
         <div className="absolute -bottom-1 left-0 right-0">
           <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
             <path
@@ -195,93 +209,106 @@ const ProfilePage: React.FC = () => {
         </div>
       </div>
 
+      {/* Enhanced Content Section */}
       <div className="bg-primary_bg">
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-yellow-400 rounded-3xl border-4 border-black p-6">
+        <div className="container mx-auto px-4 py-16">
+          <div className="bg-primary rounded-3xl border-4 border-black p-8 relative">
+            {/* Decorative elements */}
+            <div className="absolute -top-6 -right-6 w-12 h-12 bg-tertiary rounded-full border-4 border-black rotate-12"></div>
+            
+            {/* Profile Icon */}
+            <div className="flex justify-center mb-8">
+              <div className="bg-secondary w-24 h-24 rounded-full border-4 border-black flex items-center justify-center">
+                <UserCircle className="w-16 h-16" />
+              </div>
+            </div>
+
             {message && (
-              <div className={`mb-4 p-4 rounded-xl border-2 flex items-center gap-2 
-                ${messageType === 'success' ? 'bg-green-100 border-green-700 text-green-700' : 'bg-red-100 border-red-700 text-red-700'}`}>
-                <AlertCircle className="w-5 h-5" />
-                <span>{message}</span>
+              <div className={`mb-6 rounded-2xl border-4 border-black p-4 flex items-center gap-2 
+                ${messageType === 'success' ? 'bg-tertiary' : 'bg-red-400'}`}>
+                <AlertCircle className="w-6 h-6" />
+                <span className="font-bold">{message}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block font-bold mb-2">Username</label>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <div className="bg-secondary rounded-2xl border-4 border-black p-4">
+                    <label className="block font-black mb-2 tracking-wide">USERNAME</label>
                     <input
                       type="text"
                       value={profile.username}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black bg-gray-100"
+                      className="w-full px-4 py-2 rounded-xl border-4 border-black bg-primary_bg font-ChickenSoup"
                       disabled
                     />
                   </div>
 
-                  <div>
-                    <label className="block font-bold mb-2">Email</label>
+                  <div className="bg-secondary rounded-2xl border-4 border-black p-4">
+                    <label className="block font-black mb-2 tracking-wide">EMAIL</label>
                     <input
                       type="email"
                       value={profile.email}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black bg-gray-100"
+                      className="w-full px-4 py-2 rounded-xl border-4 border-black bg-primary_bg font-ChickenSoup"
                       disabled
                     />
                   </div>
 
-                  <div>
-                    <label className="block font-bold mb-2">Nama Lengkap</label>
+                  <div className="bg-secondary rounded-2xl border-4 border-black p-4">
+                    <label className="block font-black mb-2 tracking-wide">NAMA LENGKAP</label>
                     <input
                       type="text"
                       value={profile.nama_lengkap}
-                      className="w-full px-4 py-2 rounded-xl border-2 border-black bg-gray-100"
+                      className="w-full px-4 py-2 rounded-xl border-4 border-black bg-primary_bg font-ChickenSoup"
                       disabled
                     />
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block font-bold mb-2">Nomor Telepon</label>
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <div className="bg-tertiary rounded-2xl border-4 border-black p-4">
+                    <label className="block font-black mb-2 tracking-wide">NOMOR TELEPON</label>
                     <input
                       type="tel"
                       name="phone"
                       value={profile.phone}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-2 rounded-xl border-2 border-black 
-                        ${!isEditing && 'bg-gray-100'}`}
+                      className={`w-full px-4 py-2 rounded-xl border-4 border-black font-ChickenSoup
+                        ${!isEditing ? 'bg-primary_bg' : 'bg-white'}`}
                       disabled={!isEditing}
                     />
                     {errors.phone && (
-                      <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                      <p className="mt-2 font-bold text-red-600">{errors.phone}</p>
                     )}
                   </div>
 
-                  <div>
-                    <label className="block font-bold mb-2">Alamat</label>
+                  <div className="bg-tertiary rounded-2xl border-4 border-black p-4">
+                    <label className="block font-black mb-2 tracking-wide">ALAMAT</label>
                     <textarea
                       name="address"
                       value={profile.address}
                       onChange={handleInputChange}
                       rows={3}
-                      className={`w-full px-4 py-2 rounded-xl border-2 border-black resize-none
-                        ${!isEditing && 'bg-gray-100'}`}
+                      className={`w-full px-4 py-2 rounded-xl border-4 border-black resize-none font-ChickenSoup
+                        ${!isEditing ? 'bg-primary_bg' : 'bg-white'}`}
                       disabled={!isEditing}
                     />
                     {errors.address && (
-                      <p className="mt-1 text-sm text-red-600">{errors.address}</p>
+                      <p className="mt-2 font-bold text-red-600">{errors.address}</p>
                     )}
                   </div>
 
-                  <div>
-                    <label className="block font-bold mb-2">Catatan</label>
+                  <div className="bg-tertiary rounded-2xl border-4 border-black p-4">
+                    <label className="block font-black mb-2 tracking-wide">CATATAN</label>
                     <textarea
                       name="notes"
                       value={profile.notes}
                       onChange={handleInputChange}
                       rows={3}
-                      className={`w-full px-4 py-2 rounded-xl border-2 border-black resize-none
-                        ${!isEditing && 'bg-gray-100'}`}
+                      className={`w-full px-4 py-2 rounded-xl border-4 border-black resize-none font-ChickenSoup
+                        ${!isEditing ? 'bg-primary_bg' : 'bg-white'}`}
                       disabled={!isEditing}
                     />
                   </div>
@@ -293,9 +320,9 @@ const ProfilePage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditing(true)}
-                    className="px-6 py-2 bg-tertiary hover:bg-primary text-black rounded-xl border-4 border-black font-bold"
+                    className="px-8 py-3 bg-tertiary hover:bg-primary text-black rounded-full border-4 border-black font-black transition-colors"
                   >
-                    Edit Profil
+                    EDIT PROFIL
                   </button>
                 ) : (
                   <>
@@ -306,17 +333,17 @@ const ProfilePage: React.FC = () => {
                         setErrors({ phone: '', address: '', notes: '' });
                         setMessage('');
                       }}
-                      className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-black rounded-xl border-4 border-black font-bold"
+                      className="px-8 py-3 bg-primary_bg hover:bg-gray-200 text-black rounded-full border-4 border-black font-black transition-colors"
                       disabled={isSaving}
                     >
-                      Batal
+                      BATAL
                     </button>
                     <button
                       type="submit"
-                      className="px-6 py-2 bg-tertiary hover:bg-primary text-black rounded-xl border-4 border-black font-bold"
+                      className="px-8 py-3 bg-tertiary hover:bg-primary text-black rounded-full border-4 border-black font-black transition-colors"
                       disabled={isSaving}
                     >
-                      {isSaving ? 'Menyimpan...' : 'Simpan'}
+                      {isSaving ? 'MENYIMPAN...' : 'SIMPAN'}
                     </button>
                   </>
                 )}

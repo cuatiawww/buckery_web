@@ -40,13 +40,13 @@ const OrderStatusPage = () => {
   const { isAuthenticated, userType } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-    
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
-  
+
     if (userType === 'ADMIN') {
       if (pathname === '/orders') {
         router.push('/admin/paymentmonitor');
@@ -58,7 +58,7 @@ const OrderStatusPage = () => {
         return;
       }
     }
-  
+
     const fetchOrders = async () => {
       try {
         const data = await paymentService.getAllPayments();
@@ -67,83 +67,97 @@ const OrderStatusPage = () => {
         console.error('Error fetching orders:', error);
       }
     };
-  
+
     fetchOrders();
   }, [isAuthenticated, router, userType, pathname]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-tertiary border-black text-black';
       case 'rejected':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-400 border-black text-black';
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-primary border-black text-black';
     }
   };
 
   const OrderDetailModal = ({ order }: { order: Order }) => {
-
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl max-w-2xl w-full p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-bold">Detail Pembayaran #{order.orderNumber}</h3>
-            <button 
-              onClick={() => setIsDetailModalOpen(false)} 
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </button>
-          </div>
+      <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="my-8">
+          <div className="bg-primary_bg rounded-3xl border-4 border-black max-w-2xl w-full relative shadow-lg max-h-[80vh] overflow-y-auto scrollbar-hide">
+            {/* Static header */}
+            <div className="bg-primary rounded-t-3xl border-b-4 border-black p-6 flex justify-between items-center">
+              <h3 className="text-2xl font-black tracking-wide">
+                DETAIL PEMBAYARAN #{order.orderNumber}
+              </h3>
+              <button 
+                onClick={() => setIsDetailModalOpen(false)}
+                className="bg-tertiary hover:bg-primary w-10 h-10 rounded-full border-4 border-black font-bold transition-colors flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
   
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2">Detail Produk</h4>
-              <div className="space-y-2">
-                {order.items.items?.map((item, index) => (
-                  <div key={index} className="flex justify-between border-b pb-2">
-                    <span>{item.name} x{item.quantity}</span>
-                    <span>Rp {item.price.toLocaleString()}</span>
+            <div className="p-6 space-y-6">
+              {/* Products Section */}
+              <div className="bg-primary rounded-3xl border-4 border-black p-6">
+                <h4 className="font-black text-xl mb-4 tracking-wide">DETAIL PRODUK</h4>
+                <div className="space-y-4">
+                  {order.items.items?.map((item, index) => (
+                    <div 
+                      key={index} 
+                      className="flex justify-between items-center border-b-2 border-black border-dashed pb-3"
+                    >
+                      <span className="font-ChickenSoup text-lg">{item.name} x{item.quantity}</span>
+                      <span className="font-ChickenSoup text-lg">Rp {item.price.toLocaleString()}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between pt-2 items-center">
+                    <span className="font-black text-xl tracking-wide">TOTAL</span>
+                    <span className="font-black text-xl">Rp {order.total.toLocaleString()}</span>
                   </div>
-                ))}
-                <div className="flex justify-between font-bold pt-2">
-                  <span>Total</span>
-                  <span>Rp {order.total.toLocaleString()}</span>
                 </div>
               </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-2">Bukti Pembayaran</h4>
-              <div className="border rounded-lg overflow-hidden">
-                <div className="relative w-full h-64">
-                <PaymentImage
-                paymentProof={order.paymentProof}
-                className="cursor-pointer"
-                onClick={() => {
-                  setSelectedOrder(order);
-                  setIsImageModalOpen(true);
-                }}
-              />
+  
+              {/* Payment Proof Section */}
+              <div className="bg-secondary rounded-3xl border-4 border-black p-6">
+                <h4 className="font-black text-xl mb-4 tracking-wide">BUKTI PEMBAYARAN</h4>
+                <div className="rounded-2xl border-4 border-black overflow-hidden">
+                  <div className="relative w-full h-64">
+                    <PaymentImage
+                      paymentProof={order.paymentProof}
+                      className="cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setIsImageModalOpen(true);
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="font-semibold">Metode Pembayaran:</p>
-                <p>{order.paymentMethod === 'bank' ? 'Transfer Bank' : 'QRIS'}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Status:</p>
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                  {order.status.toUpperCase()}
-                </span>
-              </div>
-              <div>
-                <p className="font-semibold">Tanggal Pemesanan:</p>
-                <p>{new Date(order.createdAt).toLocaleDateString('id-ID')}</p>
+  
+              {/* Order Details Section */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-tertiary rounded-2xl border-4 border-black p-4">
+                  <p className="font-black mb-2 tracking-wide">METODE PEMBAYARAN</p>
+                  <p className="font-ChickenSoup text-lg">
+                    {order.paymentMethod === 'bank' ? 'Transfer Bank' : 'QRIS'}
+                  </p>
+                </div>
+                <div className="bg-primary rounded-2xl border-4 border-black p-4">
+                  <p className="font-black mb-2 tracking-wide">STATUS</p>
+                  <span className={`px-4 py-2 rounded-full border-4 text-sm font-black inline-block ${getStatusColor(order.status)}`}>
+                    {order.status.toUpperCase()}
+                  </span>
+                </div>
+                <div className="col-span-2 bg-secondary rounded-2xl border-4 border-black p-4">
+                  <p className="font-black mb-2 tracking-wide">TANGGAL PEMESANAN</p>
+                  <p className="font-ChickenSoup text-lg">
+                    {new Date(order.createdAt).toLocaleDateString('id-ID')}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -151,6 +165,22 @@ const OrderStatusPage = () => {
       </div>
     );
   };
+  
+  const styles = `
+    .scrollbar-hide {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;  /* Chrome, Safari and Opera */
+    }
+  `;
+  
+  if (typeof document !== 'undefined') {
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = styles;
+    document.head.appendChild(styleSheet);
+  }
 
   const ImageModal = ({ paymentProof, onClose }: ImageModalProps) => {
     return (
@@ -158,27 +188,39 @@ const OrderStatusPage = () => {
         <div className="relative max-w-4xl w-full">
           <button 
             onClick={onClose}
-            className="absolute -top-10 right-0 text-white hover:text-gray-300"
+            className="absolute -top-16 right-0 bg-tertiary hover:bg-primary px-6 py-3 rounded-full border-4 border-black font-black transition-colors text-black"
           >
             ✕ Close
           </button>
-          <div className="relative w-full h-[80vh]">
+          <div className="relative w-full h-[80vh] rounded-3xl border-4 border-black overflow-hidden">
             <PaymentImage paymentProof={paymentProof} />
           </div>
         </div>
       </div>
     );
   };
-  
 
   return (
-    <main className="min-h-screen bg-yellow-400">
+    <main className="min-h-screen bg-yellow-400 overflow-x-hidden">
       <Navbar />
       
-      {/* Header */}
-      <div className="bg-primary pt-24 pb-16 relative">
+      {/* Enhanced Header Section */}
+      <div className="bg-yellow-400 pt-32 pb-16 relative">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold text-center">Status Pesanan</h1>
+          {/* Decorative elements */}
+          <div className="absolute top-12 left-8 w-16 h-16 rounded-full bg-tertiary border-4 border-black animate-bounce delay-100"></div>
+          <div className="absolute top-24 right-12 w-12 h-12 rounded-full bg-primary border-4 border-black animate-bounce delay-300"></div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold text-center mb-8 relative">
+            <span className="relative inline-block">
+              STATUS PESANAN
+              <div className="absolute -bottom-2 left-0 w-full h-2 bg-black transform skew-x-12"></div>
+            </span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-center max-w-2xl mx-auto font-ChickenSoup">
+            Pantau status pesanan Anda dengan mudah
+          </p>
         </div>
 
         {/* Wave Border */}
@@ -200,37 +242,36 @@ const OrderStatusPage = () => {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Enhanced Content Section */}
       <div className="bg-primary_bg">
         <div className="container mx-auto px-4 py-16">
           {orders.length > 0 ? (
-            <div className="bg-white rounded-xl border-4 border-black overflow-hidden">
-              {orders.map((order) => (
+            <div className="bg-primary rounded-3xl border-4 border-black overflow-hidden shadow-lg">
+              {orders.map((order, index) => (
                 <div 
                   key={order.id}
-                  className="p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                  className={`p-6 ${index !== orders.length - 1 ? 'border-b-4 border-black' : ''} hover:bg-secondary transition-colors cursor-pointer relative`}
                   onClick={() => {
                     setSelectedOrder(order);
                     setIsDetailModalOpen(true);
                   }}
                 >
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
-                    <div className="col-span-2 mb-4">
-                      <p className="text-sm text-gray-500">Order Number: #{order.orderNumber}</p>
-                      <p className="text-sm text-gray-500">
-                        Tanggal: {new Date(order.createdAt).toLocaleDateString('id-ID')}
+                  {/* Decorative dot */}
+                  <div className="absolute top-6 right-6 w-4 h-4 rounded-full bg-tertiary border-2 border-black"></div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                    <div className="md:col-span-2">
+                      <p className="font-black text-lg">Order #{order.orderNumber}</p>
+                      <p className="font-ChickenSoup">
+                        {new Date(order.createdAt).toLocaleDateString('id-ID')}
                       </p>
                     </div>
-                    <div className="text-right md:text-left">
-                      <p className="font-semibold">Total</p>
-                      <p>Rp {order.total.toLocaleString()}</p>
-                    </div>
-                    <div className="text-right md:text-left">
-                      <p className="font-semibold">Metode</p>
-                      <p>{order.paymentMethod === 'bank' ? 'Transfer Bank' : 'QRIS'}</p>
+                    <div>
+                      <p className="font-ChickenSoup">Total Pembayaran</p>
+                      <p className="font-black text-lg">Rp {order.total.toLocaleString()}</p>
                     </div>
                     <div className="text-right">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                      <span className={`px-4 py-2 rounded-full border-4 text-sm font-black inline-block ${getStatusColor(order.status)}`}>
                         {order.status.toUpperCase()}
                       </span>
                     </div>
@@ -239,14 +280,17 @@ const OrderStatusPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">Anda belum memiliki pesanan</p>
-              <Link 
-                href="/menu"
-                className="bg-tertiary text-black font-bold py-2 px-4 rounded-xl border-4 border-black hover:bg-primary transition-colors inline-block"
-              >
-                Mulai Berbelanja
-              </Link>
+            <div className="text-center py-16">
+              <div className="bg-primary rounded-3xl border-4 border-black p-8 inline-block relative">
+                <div className="absolute -top-6 -right-6 w-12 h-12 bg-tertiary rounded-full border-4 border-black rotate-12"></div>
+                <p className="font-ChickenSoup text-xl mb-6">Anda belum memiliki pesanan</p>
+                <Link 
+                  href="/menu"
+                  className="bg-tertiary text-black font-black py-3 px-6 rounded-full border-4 border-black hover:bg-primary transition-colors inline-block"
+                >
+                  Mulai Berbelanja
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -259,9 +303,9 @@ const OrderStatusPage = () => {
       
       {selectedOrder && isImageModalOpen && (
         <ImageModal 
-        paymentProof={selectedOrder.paymentProof}
-        onClose={() => setIsImageModalOpen(false)}
-      />
+          paymentProof={selectedOrder.paymentProof}
+          onClose={() => setIsImageModalOpen(false)}
+        />
       )}
 
       <Footer />

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import Navbar from '@/components/Navbar';
@@ -34,33 +34,35 @@ interface OrderData {
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost, orderData }) => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const { items } = useCart(); // Tambahkan ini
+  const { items } = useCart();
   const total = subtotal + shippingCost;
-
-  const handlePayment = () => {
-    setIsPaymentModalOpen(true);
-  };
 
   return (
     <>
-      <div className="bg-primary rounded-xl border-2 border-black p-4 space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="font-bold">Total harga</span>
-          <span className="font-bold">Rp {subtotal.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="font-bold">Ongkos Kirim</span>
-          <span className="font-bold">Rp {shippingCost.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center pt-2 border-t-2 border-black">
-          <span className="font-bold">Total Keseluruhan</span>
-          <span className="font-bold">Rp {total.toLocaleString()}</span>
+      <div className="bg-primary rounded-3xl border-4 border-black p-6 space-y-4 relative">
+        {/* Decorative element */}
+        <div className="absolute -top-4 -right-4 w-8 h-8 bg-tertiary rounded-full border-4 border-black"></div>
+        
+        <h3 className="font-black text-xl tracking-wide mb-4">RINGKASAN PEMBAYARAN</h3>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="font-ChickenSoup text-lg">Total Harga</span>
+            <span className="font-ChickenSoup text-lg">Rp {subtotal.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="font-ChickenSoup text-lg">Ongkos Kirim</span>
+            <span className="font-ChickenSoup text-lg">Rp {shippingCost.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center pt-3 border-t-4 border-black">
+            <span className="font-black text-xl">TOTAL</span>
+            <span className="font-black text-xl">Rp {total.toLocaleString()}</span>
+          </div>
         </div>
         <button 
-          onClick={handlePayment}
-          className="w-full bg-tertiary text-black font-bold py-3 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-4"
+          onClick={() => setIsPaymentModalOpen(true)}
+          className="w-full bg-tertiary hover:bg-primary text-black font-black py-3 px-6 rounded-full border-4 border-black transition-colors mt-4"
         >
-          Bayar
+          BAYAR SEKARANG
         </button>
       </div>
 
@@ -69,14 +71,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost, ord
         onClose={() => setIsPaymentModalOpen(false)}
         orderData={{
           ...orderData,
-          cart: items // Pass cart items dari useCart
+          cart: items
         }}
         total={total}
       />
     </>
   );
 };
-
 const PaymentPage = () => {
   const router = useRouter();
   const { items } = useCart();
@@ -120,123 +121,130 @@ const PaymentPage = () => {
     };
     return labels[method as keyof typeof labels] || method;
   };
-  const PaymentHeader = () => (
-    <div className="bg-primary pt-24 pb-16 relative">
-      <div className="container mx-auto px-4">
-        {/* Absolute positioned back button */}
-        <div className="absolute left-4 z-10">
-          <Link href="/datapemesanan" className="flex items-center text-black">
-            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
-            <span className="text-xl font-bold hidden md:block">KEMBALI</span>
-          </Link>
-        </div>
-        
-        {/* Centered title */}
-        <div className="flex justify-center items-center mb-8">
-          <h1 className="text-4xl font-bold text-black">Checkout</h1>
-        </div>
-      </div>
-  
-      {/* Wave Border */}
-      <div className="absolute bottom-50 left-0 right-0">
-        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-          <path
-            fill="#000000"
-            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-          />
-        </svg>
-      </div>
-      <div className="absolute -bottom-1 left-0 right-0">
-        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-          <path
-            fill="#F8E6C2"
-            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-          />
-        </svg>
-      </div>
-    </div>
-  );
 
   return (
-    <main className="min-h-screen bg-yellow-400">
+    <main className="min-h-screen bg-yellow-400 overflow-x-hidden">
       <Navbar />
-      <PaymentHeader />
-      {/* Main Content */}
+      
+      {/* Enhanced Header Section */}
+      <div className="bg-yellow-400 pt-32 pb-16 relative">
+        <div className="container mx-auto px-4">
+          {/* Decorative elements */}
+          <div className="absolute top-12 left-8 w-16 h-16 rounded-full bg-tertiary border-4 border-black animate-bounce delay-100"></div>
+          <div className="absolute top-24 right-12 w-12 h-12 rounded-full bg-primary border-4 border-black animate-bounce delay-300"></div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold text-center mb-8 relative">
+            <span className="relative inline-block">
+              CHECKOUT
+              <div className="absolute -bottom-2 left-0 w-full h-2 bg-black transform skew-x-12"></div>
+            </span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-center max-w-2xl mx-auto font-ChickenSoup">
+            Selesaikan pesanan Anda dengan aman
+          </p>
+        </div>
+
+        {/* Wave Border */}
+        <div className="absolute bottom-50 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+            <path
+              fill="#000000"
+              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+            />
+          </svg>
+        </div>
+        <div className="absolute -bottom-1 left-0 right-0">
+          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+            <path
+              fill="#F8E6C2"
+              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Enhanced Content Section */}
       <div className="bg-primary_bg">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-16">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Left Column */}
-            <div className="md:col-span-2 space-y-4">
+            <div className="md:col-span-2 space-y-6">
               {/* Store Info */}
-              <div className="bg-secondary rounded-xl border-2 border-black p-4">
-                <h3 className="font-bold mb-2">Dikirim dari : Buckery Store</h3>
+              <div className="bg-secondary rounded-3xl border-4 border-black p-6 relative">
+                <div className="absolute -top-4 -left-4 w-8 h-8 bg-primary rounded-full border-4 border-black"></div>
+                <h3 className="font-black text-xl tracking-wide">Dikirim dari : Buckery Store</h3>
               </div>
               
               {/* Shipping Method */}
-              <div className="bg-primary rounded-xl border-2 border-black p-4">
-                <h3 className="font-bold mb-2">
+              <div className="bg-primary rounded-3xl border-4 border-black p-6 relative">
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-tertiary rounded-full border-4 border-black"></div>
+                <h3 className="font-black text-xl tracking-wide">
                   Pengiriman : {getDeliveryLabel(orderData.deliveryMethod)}
                 </h3>
               </div>
 
               {/* Recipient Info */}
-              <div className="bg-primary rounded-xl border-2 border-black p-4 space-y-2">
-                <h3 className="font-bold mb-4">Alamat Penerima</h3>
-                <p className="font-bold">{orderData.name}</p>
-                <p className="font-bold">{orderData.phone}</p>
-                <p className="font-bold">{orderData.address}</p>
+              <div className="bg-primary rounded-3xl border-4 border-black p-6 relative space-y-3">
+                <div className="absolute -top-4 -left-4 w-8 h-8 bg-secondary rounded-full border-4 border-black"></div>
+                <h3 className="font-black text-xl tracking-wide mb-4">ALAMAT PENERIMA</h3>
+                <p className="font-ChickenSoup text-lg">{orderData.name}</p>
+                <p className="font-ChickenSoup text-lg">{orderData.phone}</p>
+                <p className="font-ChickenSoup text-lg">{orderData.address}</p>
                 {orderData.notes && (
-                  <p className="text-gray-600">Catatan : {orderData.notes}</p>
+                  <p className="font-ChickenSoup text-lg">Catatan : {orderData.notes}</p>
                 )}
-                <Link 
+                {/* <Link 
                   href="/order-data"
-                  className="inline-block bg-secondary text-black font-bold py-2 px-4 rounded-xl border-2 border-black hover:bg-sky-300 transition-colors mt-2"
+                  className="inline-block bg-tertiary hover:bg-primary text-black font-black py-2 px-6 rounded-full border-4 border-black transition-colors mt-4"
                 >
-                  Ganti Alamat
-                </Link>
+                  GANTI ALAMAT
+                </Link> */}
               </div>
 
               {/* Order Details */}
-              <div className="bg-primary rounded-xl border-2 border-black p-4">
-                <h3 className="font-bold mb-4">Detail Pesanan</h3>
-                <div className="space-y-4">
+              <div className="bg-primary rounded-3xl border-4 border-black p-6 relative">
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-tertiary rounded-full border-4 border-black"></div>
+                <h3 className="font-black text-xl tracking-wide mb-6">DETAIL PESANAN</h3>
+                <div className="space-y-6">
                   {items.map((item) => (
-                    <div key={item.id} className="flex items-center space-x-4">
-                      <div className="relative w-20 h-20">
+                    <div key={item.id} className="flex items-center space-x-6 bg-primary_bg rounded-2xl border-4 border-black p-4">
+                      <div className="relative w-24 h-24">
                         <Image
                           src={item.image}
                           alt={item.name}
                           fill
-                          className="object-cover rounded-lg border-2 border-black"
+                          className="object-cover rounded-xl border-4 border-black"
                         />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold">{item.name}</h4>
-                        <p className="text-gray-600">Rp {item.price.toLocaleString()}</p>
-                        <p>Quantity : {item.quantity}</p>
+                        <h4 className="font-black text-lg mb-1">{item.name}</h4>
+                        <p className="font-ChickenSoup">Rp {item.price.toLocaleString()}</p>
+                        <p className="font-ChickenSoup">Quantity: {item.quantity}</p>
                       </div>
-                      <span className="font-bold">
+                      <span className="font-black text-lg">
                         Rp {(item.price * item.quantity).toLocaleString()}
                       </span>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t-2 border-black">
+                <div className="mt-6 pt-4 border-t-4 border-black">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold">Sub Total :</span>
-                    <span className="font-bold">Rp {subtotal.toLocaleString()}</span>
+                    <span className="font-black text-xl">SUB TOTAL</span>
+                    <span className="font-black text-xl">Rp {subtotal.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* Right Column */}
             <div>
-  <OrderSummary 
-    subtotal={subtotal} 
-    shippingCost={shippingCost} 
-    orderData={orderData}  // Menambahkan orderData yang diperlukan
-  />
-</div>
+              <OrderSummary 
+                subtotal={subtotal} 
+                shippingCost={shippingCost} 
+                orderData={orderData}
+              />
+            </div>
           </div>
         </div>
       </div>
