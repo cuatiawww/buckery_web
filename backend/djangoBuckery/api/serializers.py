@@ -179,10 +179,13 @@ class TestimonialSerializer(serializers.ModelSerializer):
     
 # PAYMENT
 class PaymentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)  # Tambahkan ini
+
     class Meta:
         model = Payment
         fields = [
             'id',
+            'user',  # Tambahkan ini
             'order_number',
             'customer_name',
             'phone',
@@ -196,7 +199,7 @@ class PaymentSerializer(serializers.ModelSerializer):
             'created_at',
             'notes'
         ]
-        read_only_fields = ['id', 'order_number', 'created_at']
+        read_only_fields = ['id', 'order_number', 'created_at', 'user']
 
     def create(self, validated_data):
         # Generate unique order number

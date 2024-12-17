@@ -6,6 +6,7 @@ import { contactService } from '@/services/api';
 import type { ContactInfo } from '@/services/api';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { AlertCircle, Loader2, ArrowLeft, MapPin, Phone, Mail, Clock, Instagram } from 'lucide-react';
 
 export default function ContactInfoManagement() {
   const router = useRouter();
@@ -98,159 +99,202 @@ export default function ContactInfoManagement() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="flex justify-center items-center h-32">
-          <div className="text-lg">Loading...</div>
-        </div>
+      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
+        <Loader2 className="w-32 h-32 animate-spin text-black" />
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Contact Information Management</h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <a href="/admin/dashboard" className="flex items-center text-gray-600 hover:text-gray-900">
+                <ArrowLeft className="w-6 h-6 mr-2" />
+                Back to Dashboard
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border-2 border-red-400 text-red-700 rounded-lg flex items-center">
+            <AlertCircle className="w-5 h-5 mr-2" />
+            {error}
+          </div>
+        )}
+
+        <div className="mb-8 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Location Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center">
+                <MapPin className="w-5 h-5 mr-2" />
+                Location Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold mb-1">Address</label>
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-semibold mb-1">Latitude</label>
+                    <input
+                      type="text"
+                      value={formData.latitude}
+                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                      placeholder="-6.2088"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-1">Longitude</label>
+                    <input
+                      type="text"
+                      value={formData.longitude}
+                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                      placeholder="106.8456"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center">
+                <Phone className="w-5 h-5 mr-2" />
+                Contact Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold mb-1">WhatsApp Number</label>
+                  <input
+                    type="text"
+                    value={formData.whatsapp_number}
+                    onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Alternative Phone</label>
+                  <input
+                    type="text"
+                    value={formData.phone_number2}
+                    onChange={(e) => setFormData({ ...formData, phone_number2: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">
+                    <Mail className="w-4 h-4 inline mr-1" />
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">
+                    <Instagram className="w-4 h-4 inline mr-1" />
+                    Instagram
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.instagram}
+                    onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Business Hours Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center">
+                <Clock className="w-5 h-5 mr-2" />
+                Business Hours
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block font-semibold mb-1">Weekday Hours</label>
+                  <input
+                    type="text"
+                    value={formData.weekday_hours}
+                    onChange={(e) => setFormData({ ...formData, weekday_hours: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    placeholder="09:00 - 17:00"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Saturday Hours</label>
+                  <input
+                    type="text"
+                    value={formData.saturday_hours}
+                    onChange={(e) => setFormData({ ...formData, saturday_hours: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    placeholder="10:00 - 15:00"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Sunday Hours</label>
+                  <input
+                    type="text"
+                    value={formData.sunday_hours}
+                    onChange={(e) => setFormData({ ...formData, sunday_hours: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    placeholder="Closed"
+                    required
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-tertiary hover:bg-primary text-black rounded-lg border-4 border-black font-bold flex items-center"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : 'Save Contact Information'}
+              </button>
+            </div>
+          </form>
         </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1">Location</label>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">WhatsApp Number</label>
-            <input
-              type="text"
-              value={formData.whatsapp_number}
-              onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Alternative Phone Number</label>
-            <input
-              type="text"
-              value={formData.phone_number2}
-              onChange={(e) => setFormData({ ...formData, phone_number2: e.target.value })}
-              className="w-full p-2 border rounded"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Instagram</label>
-            <input
-              type="text"
-              value={formData.instagram}
-              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Weekday Hours</label>
-            <input
-              type="text"
-              value={formData.weekday_hours}
-              onChange={(e) => setFormData({ ...formData, weekday_hours: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              disabled={isSubmitting}
-              placeholder="e.g. 09:00 - 17:00"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Saturday Hours</label>
-            <input
-              type="text"
-              value={formData.saturday_hours}
-              onChange={(e) => setFormData({ ...formData, saturday_hours: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              disabled={isSubmitting}
-              placeholder="e.g. 10:00 - 15:00"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Sunday Hours</label>
-            <input
-              type="text"
-              value={formData.sunday_hours}
-              onChange={(e) => setFormData({ ...formData, sunday_hours: e.target.value })}
-              className="w-full p-2 border rounded"
-              required
-              disabled={isSubmitting}
-              placeholder="e.g. Closed"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Latitude</label>
-            <input
-              type="text"
-              value={formData.latitude}
-              onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-              className="w-full p-2 border rounded"
-              disabled={isSubmitting}
-              placeholder="e.g. -6.2088"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">Longitude</label>
-            <input
-              type="text"
-              value={formData.longitude}
-              onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-              className="w-full p-2 border rounded"
-              disabled={isSubmitting}
-              placeholder="e.g. 106.8456"
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className="mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Saving...' : 'Save Contact Information'}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

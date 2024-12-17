@@ -22,10 +22,19 @@ interface OrderData {
   address: string;
   notes: string;
   deliveryMethod: string;
+  cart?: { // Tambahkan cart sebagai opsional
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+  }[];
 }
+
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost, orderData }) => {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const { items } = useCart(); // Tambahkan ini
   const total = subtotal + shippingCost;
 
   const handlePayment = () => {
@@ -58,7 +67,10 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ subtotal, shippingCost, ord
       <PaymentModal 
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
-        orderData={orderData}
+        orderData={{
+          ...orderData,
+          cart: items // Pass cart items dari useCart
+        }}
         total={total}
       />
     </>

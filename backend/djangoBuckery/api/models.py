@@ -218,6 +218,7 @@ class Payment(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Payment'
         verbose_name_plural = 'Payments'
+        
 
     def __str__(self):
         return f"Payment {self.order_number} - {self.customer_name}"
@@ -227,3 +228,9 @@ class Payment(models.Model):
             import time
             self.order_number = f"ORD{int(time.time())}"
         super().save(*args, **kwargs)
+    @property
+    def payment_proof_url(self):
+        if self.payment_proof:
+            # Pastikan menggunakan MEDIA_URL yang benar dari settings
+            return f"{settings.MEDIA_URL}{self.payment_proof}"
+        return None

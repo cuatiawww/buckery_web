@@ -496,6 +496,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all().order_by('-created_at')
     serializer_class = PaymentSerializer
     parser_classes = (MultiPartParser, FormParser)
+    
 
     def get_permissions(self):
         """
@@ -516,16 +517,26 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return Payment.objects.filter(user=self.request.user).order_by('-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        import time
+        order_number = f"ORD{int(time.time())}"
+        
+        # Ambil base URL dari settings
+        if 'payment_proof' in self.request.FILES:
+            payment_proof = self.request.FILES['payment_proof']
+            # Set nama file yang unik
+            file_name = f"{order_number}_{payment_proof.name}"
+            payment_proof.name = file_name
+
+        serializer.save(
+            user=self.request.user,
+            order_number=order_number
+        )
 
     @action(detail=True, methods=['post'])
     def confirm_payment(self, request, pk=None):
         payment = self.get_object()
         payment.status = 'confirmed'
         payment.save()
-        
-        # You might want to add additional logic here
-        # Like sending confirmation email/notification to user
         
         serializer = self.get_serializer(payment)
         return Response(serializer.data)
@@ -535,9 +546,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
         payment = self.get_object()
         payment.status = 'rejected'
         payment.save()
-        
-        # You might want to add additional logic here
-        # Like sending rejection notification to user
         
         serializer = self.get_serializer(payment)
         return Response(serializer.data)

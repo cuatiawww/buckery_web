@@ -1,15 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { paymentService } from '@/services/api';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PaymentImage from '@/components/PaymentImage';
+
+interface ImageModalProps {
+  paymentProof: string;
+  onClose: () => void;
+}
 
 interface Order {
   id: string;
@@ -29,21 +33,22 @@ interface Order {
 }
 
 const OrderStatusPage = () => {
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const { isAuthenticated, userType } = useAuth(); // Tambahkan userType
-    const router = useRouter();
-    const pathname = usePathname();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const { isAuthenticated, userType } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+    
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
   
-    // Perbaiki path untuk user
     if (userType === 'ADMIN') {
-      if (pathname === '/profile/orders') {
+      if (pathname === '/orders') {
         router.push('/admin/paymentmonitor');
         return;
       }
@@ -77,67 +82,94 @@ const OrderStatusPage = () => {
     }
   };
 
-  const OrderDetailModal = ({ order }: { order: Order }) => (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full p-6">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="text-xl font-bold">Detail Pesanan #{order.orderNumber}</h3>
-          <button 
-            onClick={() => setIsDetailModalOpen(false)}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
+  const OrderDetailModal = ({ order }: { order: Order }) => {
 
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-semibold mb-2">Detail Produk</h4>
-            <div className="space-y-2">
-              {order.items.items?.map((item, index) => (
-                <div key={index} className="flex justify-between border-b pb-2">
-                  <span>{item.name} x{item.quantity}</span>
-                  <span>Rp {item.price.toLocaleString()}</span>
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl max-w-2xl w-full p-6">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-xl font-bold">Detail Pembayaran #{order.orderNumber}</h3>
+            <button 
+              onClick={() => setIsDetailModalOpen(false)} 
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+  
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold mb-2">Detail Produk</h4>
+              <div className="space-y-2">
+                {order.items.items?.map((item, index) => (
+                  <div key={index} className="flex justify-between border-b pb-2">
+                    <span>{item.name} x{item.quantity}</span>
+                    <span>Rp {item.price.toLocaleString()}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between font-bold pt-2">
+                  <span>Total</span>
+                  <span>Rp {order.total.toLocaleString()}</span>
                 </div>
-              ))}
-              <div className="flex justify-between font-bold pt-2">
-                <span>Total</span>
-                <span>Rp {order.total.toLocaleString()}</span>
               </div>
             </div>
-          </div>
 
-          <div>
-            <h4 className="font-semibold mb-2">Bukti Pembayaran</h4>
-            <div className="border rounded-lg overflow-hidden">
-              <img 
-                src={order.paymentProof} 
-                alt="Payment Proof"
-                className="w-full h-64 object-cover"
+            <div>
+              <h4 className="font-semibold mb-2">Bukti Pembayaran</h4>
+              <div className="border rounded-lg overflow-hidden">
+                <div className="relative w-full h-64">
+                <PaymentImage
+                paymentProof={order.paymentProof}
+                className="cursor-pointer"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setIsImageModalOpen(true);
+                }}
               />
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="font-semibold">Metode Pembayaran:</p>
-              <p>{order.paymentMethod === 'bank' ? 'Transfer Bank' : 'QRIS'}</p>
-            </div>
-            <div>
-              <p className="font-semibold">Status:</p>
-              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                {order.status.toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <p className="font-semibold">Tanggal Pemesanan:</p>
-              <p>{new Date(order.createdAt).toLocaleDateString('id-ID')}</p>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-semibold">Metode Pembayaran:</p>
+                <p>{order.paymentMethod === 'bank' ? 'Transfer Bank' : 'QRIS'}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Status:</p>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                  {order.status.toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="font-semibold">Tanggal Pemesanan:</p>
+                <p>{new Date(order.createdAt).toLocaleDateString('id-ID')}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const ImageModal = ({ paymentProof, onClose }: ImageModalProps) => {
+    return (
+      <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div className="relative max-w-4xl w-full">
+          <button 
+            onClick={onClose}
+            className="absolute -top-10 right-0 text-white hover:text-gray-300"
+          >
+            ✕ Close
+          </button>
+          <div className="relative w-full h-[80vh]">
+            <PaymentImage paymentProof={paymentProof} />
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
 
   return (
     <main className="min-h-screen bg-yellow-400">
@@ -183,10 +215,10 @@ const OrderStatusPage = () => {
                   }}
                 >
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
-                    <div>
-                      <p className="font-semibold">Order #{order.orderNumber}</p>
+                    <div className="col-span-2 mb-4">
+                      <p className="text-sm text-gray-500">Order Number: #{order.orderNumber}</p>
                       <p className="text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString('id-ID')}
+                        Tanggal: {new Date(order.createdAt).toLocaleDateString('id-ID')}
                       </p>
                     </div>
                     <div className="text-right md:text-left">
@@ -220,8 +252,16 @@ const OrderStatusPage = () => {
         </div>
       </div>
 
+      {/* Modals */}
       {selectedOrder && isDetailModalOpen && (
         <OrderDetailModal order={selectedOrder} />
+      )}
+      
+      {selectedOrder && isImageModalOpen && (
+        <ImageModal 
+        paymentProof={selectedOrder.paymentProof}
+        onClose={() => setIsImageModalOpen(false)}
+      />
       )}
 
       <Footer />

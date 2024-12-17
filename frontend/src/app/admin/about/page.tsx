@@ -437,174 +437,164 @@ const AboutPage = () => {
       </div>
 
       {/* Add/Edit Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6">
-            <h2 className="text-2xl font-bold mb-4">
-              {activeTab === 'team' ? 'Tambah/Edit Anggota Tim' : 'Tambah/Edit Timeline'}
-            </h2>
-            
-            <form onSubmit={activeTab === 'team' ? handleTeamSubmit : handleTimelineSubmit}>
-              {/* Form fields based on active tab */}
-              {activeTab === 'team' ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block font-bold mb-1">Nama</label>
-                    <input
-                      type="text"
-                      value={teamFormData.name}
-                      onChange={(e) => setTeamFormData({...teamFormData, name: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold mb-1">Role</label>
-                    <input
-                      type="text"
-                      value={teamFormData.role}
-                      onChange={(e) => setTeamFormData({...teamFormData, role: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
-                      required
-                    />
-                  </div>
-                  <div>
-  <label className="block font-bold mb-1">Quote</label>
-  <textarea
-    value={teamFormData.quote || ''} 
-    onChange={(e) => setTeamFormData({...teamFormData, quote: e.target.value || null})}
-    className="w-full px-4 py-2 rounded-lg border-2 border-black"
-    rows={3}
-  />
-</div>
-                  <div>
-                    <label className="block font-bold mb-1">Tipe Anggota</label>
-                    <select
-                      value={teamFormData.member_type}
-                      onChange={(e) => setTeamFormData({...teamFormData, member_type: e.target.value as 'FOUNDER' | 'TEAM'})}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
-                    >
-                      <option value="FOUNDER">Founder</option>
-                      <option value="TEAM">Team Member</option>
-                    </select>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block font-bold mb-1">Tahun</label>
-                    <input
-                      type="text"
-                      value={timelineFormData.year}
-                      onChange={(e) => setTimelineFormData({...timelineFormData, year: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
-                      required
-                    />
-                  </div>
-                  <div>
-                  <label className="block font-bold mb-1">Judul</label>
-                    <input
-                      type="text"
-                      value={timelineFormData.title}
-                      onChange={(e) => setTimelineFormData({...timelineFormData, title: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold mb-1">Deskripsi</label>
-                    <textarea
-                      value={timelineFormData.description}
-                      onChange={(e) => setTimelineFormData({...timelineFormData, description: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-black"
-                      rows={3}
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Common fields for both forms */}
-              <div className="mt-4">
-                <label className="block font-bold mb-1">Urutan</label>
+{showAddModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="bg-white rounded-lg max-w-2xl w-full p-6 my-8 relative">
+      <h2 className="text-2xl font-bold mb-4 sticky top-0 bg-white">
+        {activeTab === 'team' ? 'Tambah/Edit Anggota Tim' : 'Tambah/Edit Timeline'}
+      </h2>
+      
+      <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+        <form onSubmit={activeTab === 'team' ? handleTeamSubmit : handleTimelineSubmit}>
+          {/* Form fields based on active tab */}
+          {activeTab === 'team' ? (
+            <div className="space-y-4">
+              <div>
+                <label className="block font-bold mb-1">Nama</label>
                 <input
-                  type="number"
-                  value={activeTab === 'team' ? teamFormData.order : timelineFormData.order}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    if (activeTab === 'team') {
-                      setTeamFormData({...teamFormData, order: value});
-                    } else {
-                      setTimelineFormData({...timelineFormData, order: value});
-                    }
-                  }}
+                  type="text"
+                  value={teamFormData.name}
+                  onChange={(e) => setTeamFormData({...teamFormData, name: e.target.value})}
                   className="w-full px-4 py-2 rounded-lg border-2 border-black"
                   required
                 />
               </div>
-
-              <div className="mt-4">
-                <label className="block font-bold mb-1">Gambar</label>
+              <div>
+                <label className="block font-bold mb-1">Role</label>
                 <input
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      if (activeTab === 'team') {
-                        setTeamFormData({...teamFormData, image: file});
-                      } else {
-                        setTimelineFormData({...timelineFormData, image: file});
-                      }
-                    }
-                  }}
-                  accept="image/*"
-                  className="w-full"
+                  type="text"
+                  value={teamFormData.role}
+                  onChange={(e) => setTeamFormData({...teamFormData, role: e.target.value})}
+                  className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                  required
                 />
               </div>
+              <div>
+                <label className="block font-bold mb-1">Quote</label>
+                <textarea
+                  value={teamFormData.quote || ''} 
+                  onChange={(e) => setTeamFormData({...teamFormData, quote: e.target.value || null})}
+                  className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="block font-bold mb-1">Tipe Anggota</label>
+                <select
+                  value={teamFormData.member_type}
+                  onChange={(e) => setTeamFormData({...teamFormData, member_type: e.target.value as 'FOUNDER' | 'TEAM'})}
+                  className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                >
+                  <option value="FOUNDER">Founder</option>
+                  <option value="TEAM">Team Member</option>
+                </select>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block font-bold mb-1">Tahun</label>
+                <input
+                  type="text"
+                  value={timelineFormData.year}
+                  onChange={(e) => setTimelineFormData({...timelineFormData, year: e.target.value})}
+                  className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-bold mb-1">Judul</label>
+                <input
+                  type="text"
+                  value={timelineFormData.title}
+                  onChange={(e) => setTimelineFormData({...timelineFormData, title: e.target.value})}
+                  className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-bold mb-1">Deskripsi</label>
+                <textarea
+                  value={timelineFormData.description}
+                  onChange={(e) => setTimelineFormData({...timelineFormData, description: e.target.value})}
+                  className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                  rows={3}
+                  required
+                />
+              </div>
+            </div>
+          )}
 
-              <div className="mt-6 flex justify-end space-x-4">
-  <button
-    type="button"
-    onClick={() => {
-      setShowAddModal(false);
-      // Menggunakan default form state untuk reset
-      if (activeTab === 'team') {
-        setTeamFormData({
-          name: '',
-          role: '',
-          quote: null,
-          member_type: 'TEAM',
-          order: 0,
-          image: null
-        });
-      } else {
-        setTimelineFormData({
-          year: '',
-          title: '',
-          description: '',
-          order: 0,
-          image: null
-        });
-      }
-    }}
-    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-black rounded-lg border-4 border-black font-bold"
-  >
-    Batal
-  </button>
-  <button
-    type="submit"
-    className="px-4 py-2 bg-tertiary hover:bg-primary text-black rounded-lg border-4 border-black font-bold"
-  >
-    {activeTab === 'team' ? 
-      (teamFormData.id ? 'Update Anggota' : 'Tambah Anggota') : 
-      (timelineFormData.id ? 'Update Timeline' : 'Tambah Timeline')
-    }
-  </button>
-</div>
-            </form>
+          {/* Common fields for both forms */}
+          <div className="mt-4">
+            <label className="block font-bold mb-1">Urutan</label>
+            <input
+              type="number"
+              value={activeTab === 'team' ? teamFormData.order : timelineFormData.order}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (activeTab === 'team') {
+                  setTeamFormData({...teamFormData, order: value});
+                } else {
+                  setTimelineFormData({...timelineFormData, order: value});
+                }
+              }}
+              className="w-full px-4 py-2 rounded-lg border-2 border-black"
+              required
+            />
           </div>
-        </div>
-      )}
+
+          <div className="mt-4">
+            <label className="block font-bold mb-1">Gambar</label>
+            <input
+              type="file"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (activeTab === 'team') {
+                    setTeamFormData({...teamFormData, image: file});
+                  } else {
+                    setTimelineFormData({...timelineFormData, image: file});
+                  }
+                }
+              }}
+              accept="image/*"
+              className="w-full px-4 py-2 rounded-lg border-2 border-black"
+            />
+          </div>
+        </form>
+      </div>
+
+      {/* Footer buttons - sticky at bottom */}
+      <div className="sticky bottom-0 bg-white pt-4 mt-6 flex justify-end space-x-4 border-t">
+        <button
+          type="button"
+          onClick={() => {
+            setShowAddModal(false);
+            if (activeTab === 'team') {
+              setTeamFormData(defaultTeamForm);
+            } else {
+              setTimelineFormData(defaultTimelineForm);
+            }
+          }}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-black rounded-lg border-4 border-black font-bold"
+        >
+          Batal
+        </button>
+        <button
+          onClick={activeTab === 'team' ? handleTeamSubmit : handleTimelineSubmit}
+          type="button"
+          className="px-4 py-2 bg-tertiary hover:bg-primary text-black rounded-lg border-4 border-black font-bold"
+        >
+          {activeTab === 'team' ? 
+            (teamFormData.id ? 'Update Anggota' : 'Tambah Anggota') : 
+            (timelineFormData.id ? 'Update Timeline' : 'Tambah Timeline')
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };

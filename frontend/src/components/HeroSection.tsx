@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 const HeroSection = () => {
-  const images = ['/Pict1.jpg', '/Pict2.jpg', '/Pict3.jpg'];
+  const images = ['/pro3.jpg', '/dimsum.jpg', '/pro1.jpg'];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 

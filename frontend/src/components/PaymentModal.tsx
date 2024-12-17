@@ -8,22 +8,22 @@ import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 
 interface PaymentModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    orderData: {
+  isOpen: boolean;
+  onClose: () => void;
+  orderData: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    cart?: { // Make cart optional to prevent type errors
+      id: number;
       name: string;
-      phone: string;
-      email: string;
-      address: string;
-      cart: {
-        id: number;
-        name: string;
-        price: number;
-        quantity: number;
-      }[];
-    };
-    total: number;
-  }
+      price: number;
+      quantity: number;
+    }[];
+  };
+  total: number;
+}
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, orderData, total }) => {
   const [selectedPayment, setSelectedPayment] = useState('bank');
@@ -32,10 +32,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, orderData,
   const [error, setError] = useState('');
   const { clearCart } = useCart();
   const router = useRouter();
+  const { items } = useCart();
+  console.log('orderData:', orderData);
 
   const bankAccounts = [
-    { bank: 'BCA', number: '1234567890', name: 'BUCKERY STORE' },
-    { bank: 'Mandiri', number: '0987654321', name: 'BUCKERY STORE' },
+    { bank: 'BCA', number: '7425211366', name: 'Yosua Elwistio Malau' },
+    { bank: 'Mandiri', number: '0987654321', name: 'Yosua Elwistio Malau' },
   ];
 
   if (!isOpen) return null;
@@ -70,12 +72,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, orderData,
       formData.append('email', orderData.email);
       formData.append('address', orderData.address);
       
-      // Gunakan cart items yang sebenarnya
+      // Format items sesuai yang diharapkan backend
       const itemsData = {
-        items: orderData.cart.map(item => ({
+        items: items.map(item => ({
           name: item.name,
           quantity: item.quantity,
-          price: item.price
+          price: item.price,
+          image: item.image // Tambahkan image jika diperlukan
         }))
       };
       
@@ -84,12 +87,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, orderData,
       formData.append('payment_method', selectedPayment);
       formData.append('payment_proof', paymentProof);
       formData.append('status', 'pending');
-  
-      await paymentService.createPayment(formData);
-      clearCart(); // Kosongkan cart setelah pembayaran berhasil
+
+      const response = await paymentService.createPayment(formData);
+      console.log('Payment created:', response);
+      
+      clearCart(); 
       onClose();
-      router.push('/profile/orders'); // Redirect ke halaman status pesanan
+      router.push('/orders'); // Update path ke /profile/orders
     } catch (error) {
+      console.error('Upload error:', error);
       setError('Gagal mengupload bukti pembayaran');
     } finally {
       setIsUploading(false);
@@ -161,13 +167,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, orderData,
             </div>
           ) : (
             <div className="bg-gray-50 p-4 rounded-lg text-center">
-              <img 
-                src="/api/placeholder/300/300"
-                alt="QRIS Code"
-                className="mx-auto mb-4 border-2 border-black rounded-lg"
-              />
-              <p className="font-bold">Scan QRIS code untuk pembayaran</p>
-            </div>
+        <Image 
+          src="/.png" // Ganti dengan QRIS image yang sebenarnya
+          alt="QRIS Code"
+          width={300}
+          height={300}
+          className="mx-auto mb-4 border-2 border-black rounded-lg"
+        />
+        <p className="font-bold">Scan QRIS code untuk pembayaran</p>
+      </div>
           )}
 
           {/* Upload Section */}

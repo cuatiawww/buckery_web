@@ -770,7 +770,17 @@ export const aboutService = {
     getAllPayments: async () => {
       try {
         const response = await api.get('/payments/');
-        return response.data;
+        console.log('API Response:', response.data); // Debug log
+        // Transform data jika perlu
+        const payments = response.data.map((payment: any) => ({
+          ...payment,
+          orderNumber: payment.order_number || 'N/A',
+          customerName: payment.customer_name || 'N/A',
+          paymentMethod: payment.payment_method || 'bank',
+          paymentProof: payment.payment_proof,
+          createdAt: payment.created_at
+        }));
+        return payments;
       } catch (error) {
         console.error('Error fetching payments:', error);
         throw error;
@@ -803,11 +813,12 @@ export const aboutService = {
         throw error;
       }
     },
-    createPayment: async (data: FormData) => {
+    createPayment: async (formData: FormData) => {
       try {
-        const response = await api.post('/payments/', data, {
+        const response = await api.post('/payments/', formData, {
           headers: {
-            'Content-Type': 'multipart/form-data'
+            // Jangan set Content-Type, biarkan browser yang mengaturnya untuk FormData
+            // 'Content-Type': 'multipart/form-data' // Hapus atau comment line ini
           }
         });
         return response.data;

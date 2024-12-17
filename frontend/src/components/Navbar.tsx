@@ -15,7 +15,7 @@ const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { itemCount } = useCart();
-  const { isAuthenticated, username, logout: authLogout } = useAuth();
+  const { isAuthenticated, username, userType, logout: authLogout } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -99,7 +99,23 @@ const Navbar = () => {
   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border-4 border-black">
     <div className="p-2 border-b border-black">
       <span className="text-sm font-medium">{username}</span>
+      <span className="text-xs block text-gray-500">{userType}</span>
     </div>
+
+    {/* Tambahkan link Admin Dashboard khusus untuk ADMIN/STAFF */}
+    {(userType === 'ADMIN' || userType === 'STAFF') && (
+      <Link 
+        href="/admin/dashboard" 
+        className="block w-full p-2 text-left hover:bg-gray-50"
+        onClick={() => setIsDropdownOpen(false)}
+      >
+        <div className="flex items-center gap-2">
+          <User className="w-4 h-4" />
+          <span>Admin Dashboard</span>
+        </div>
+      </Link>
+    )}
+
     <Link 
       href="/profile" 
       className="block w-full p-2 text-left hover:bg-gray-50"
@@ -110,7 +126,7 @@ const Navbar = () => {
         <span>Profil</span>
       </div>
     </Link>
-    {/* Tambah link pesanan */}
+
     <Link 
       href="/orders" 
       className="block w-full p-2 text-left hover:bg-gray-50"
@@ -121,6 +137,7 @@ const Navbar = () => {
         <span>Status Pesanan</span>
       </div>
     </Link>
+    
     <button onClick={handleLogout} className="w-full p-2 flex items-center space-x-2 text-red-600 hover:bg-gray-50">
       <LogOut className="w-4 h-4" />
       <span>Keluar</span>

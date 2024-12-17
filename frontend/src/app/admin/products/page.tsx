@@ -5,9 +5,11 @@ import React, { useState, useEffect } from 'react';
 import { menuService } from '@/services/api';
 import type { Product, Category } from '@/services/api';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';  
+import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { AlertCircle, Loader2, PlusCircle, ArrowLeft, Eye, EyeOff, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ProductManagement() {
   const router = useRouter();
@@ -27,7 +29,6 @@ export default function ProductManagement() {
     image: null as File | null,
   });
 
-  // Gabungkan fetch data dalam satu useEffect
   useEffect(() => {
     const fetchInitialData = async () => {
       const token = Cookies.get('token');
@@ -191,196 +192,229 @@ export default function ProductManagement() {
     }
   };
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-yellow-400 flex items-center justify-center">
+        <Loader2 className="w-32 h-32 animate-spin text-black" />
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Product Management</h1>
-        <button
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            if (!showAddForm) {
-              setEditingId(null);
-              setFormData({
-                name: '',
-                price: 0,
-                description: '',
-                stock: 0,
-                category: 1,
-                image: null,
-              });
-            }
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          {showAddForm ? 'Cancel' : 'Add New Product'}
-        </button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <a href="/admin/dashboard" className="flex items-center text-gray-600 hover:text-gray-900">
+                <ArrowLeft className="w-6 h-6 mr-2" />
+                Back to Dashboard
+              </a>
+            </div>
+            <button
+              onClick={() => {
+                setShowAddForm(true);
+                setEditingId(null);
+                setFormData({
+                  name: '',
+                  price: 0,
+                  description: '',
+                  stock: 0,
+                  category: 1,
+                  image: null,
+                });
+              }}
+              className="bg-tertiary hover:bg-primary text-black px-4 py-2 rounded-lg border-4 border-black font-bold flex items-center"
+            >
+              <PlusCircle className="w-5 h-5 mr-2" />
+              Add New Product
+            </button>
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      {showAddForm && (
-        <form onSubmit={handleSubmit} className="mb-6 bg-white p-6 rounded-lg shadow">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1">Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full p-2 border rounded"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Price</label>
-              <input
-                type="number"
-                value={formData.price}
-onChange={(e) => {
-  const value = parseFloat(e.target.value);
-  setFormData({ ...formData, price: isNaN(value) ? 0 : value });
-}}
-
-                className="w-full p-2 border rounded"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Stock</label>
-              <input
-                type="number"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-                className="w-full p-2 border rounded"
-                required
-              />
-            </div>
-            <div>
-              <label className="block mb-1">Category</label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: Number(e.target.value) })}
-                className="w-full p-2 border rounded"
-                required
-              >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="col-span-2">
-              <label className="block mb-1">Description</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full p-2 border rounded"
-                rows={3}
-                required
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block mb-1">Image</label>
-              <input
-    type="file"
-    onChange={handleImageChange}
-    className="w-full p-2 border rounded"
-    accept="image/*"
-  />
-            </div>
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border-2 border-red-400 text-red-700 rounded-lg flex items-center">
+            <AlertCircle className="w-5 h-5 mr-2" />
+            {error}
           </div>
-          <button
-            type="submit"
-            className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            {editingId ? 'Update Product' : 'Create Product'}
-          </button>
-        </form>
-      )}
+        )}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-  {product.image && (
-    <Image
-      src={product.image}
-      alt={product.name}
-      className="h-10 w-10 rounded-full object-cover"
-      width={40} // Ukuran lebar
-      height={40} // Ukuran tinggi
-    />
-  )}
-</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-  {typeof product.price === "number" ? `$${product.price.toFixed(2)}` : "Invalid price"}
-</td>
+        {showAddForm && (
+          <div className="mb-8 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+            <h2 className="text-2xl font-bold mb-4">
+              {editingId ? 'Edit Product' : 'Add New Product'}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Price</label>
+                  <input
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      setFormData({ ...formData, price: isNaN(value) ? 0 : value });
+                    }}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Stock</label>
+                  <input
+                    type="number"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-1">Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: Number(e.target.value) })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    required
+                  >
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block font-semibold mb-1">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    rows={3}
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block font-semibold mb-1">Image</label>
+                  <input
+                    type="file"
+                    onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })}
+                    className="w-full px-4 py-2 rounded-lg border-2 border-black"
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg border-4 border-black font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-tertiary hover:bg-primary rounded-lg border-4 border-black font-bold"
+                >
+                  {editingId ? 'Update Product' : 'Add Product'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {product.stock}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {categories.find(c => c.id === product.category)?.name || "Unknown Category"}
-
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    product.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {product.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="text-indigo-600 hover:text-indigo-900"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus(product)}
-                    className={`${
-                      product.is_active 
-                        ? 'text-red-600 hover:text-red-900' 
-                        : 'text-green-600 hover:text-green-900'
-                    }`}
-                  >
-                    {product.is_active ? 'Deactivate' : 'Activate'}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Product List */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Image</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Price</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Stock</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Category</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                  <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {products.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      {product.image && (
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          className="h-10 w-10 rounded-full object-cover"
+                          width={40}
+                          height={40}
+                        />
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{product.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      ${typeof product.price === "number" ? product.price.toFixed(2) : "Invalid price"}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{product.stock}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {categories.find(c => c.id === product.category)?.name || "Unknown Category"}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        product.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {product.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-right">
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus(product)}
+                          className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${
+                            product.is_active
+                              ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          {product.is_active ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

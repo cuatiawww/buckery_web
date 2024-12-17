@@ -50,7 +50,7 @@ const Footer = () => {
                 <div className="flex items-start gap-3 text-gray-300">
                   <MapPin size={20} className="flex-shrink-0 mt-1" />
                   <span className="font-ChickenSoup">
-                    Jl. Contoh No. 123, Kota Bandung
+                    Jl. Pinayungan No. 93 Kab.Karawang
                   </span>
                 </div>
               </div>
@@ -62,13 +62,13 @@ const Footer = () => {
               <div className="flex flex-col gap-6">
                 {/* Social Links */}
                 <a 
-                  href="https://instagram.com/buckery" 
+                  href="https://instagram.com/buckery.id" 
                   className="flex items-center gap-4 hover:text-secondary transition-colors group"
                 >
                   <div className="bg-primary p-2 rounded-xl border-2 border-black group-hover:bg-secondary transition-colors">
                     <Instagram size={28} className="text-black" />
                   </div>
-                  <span className="font-bold text-lg md:text-xl">@BUCKERY</span>
+                  <span className="font-bold text-lg md:text-xl">@BUCKERY.id</span>
                 </a>
                 
                 <a 
@@ -82,13 +82,13 @@ const Footer = () => {
                 </a>
                 
                 <a 
-                  href="tel:+62XXXXXXXXXX" 
+                  href="tel:+6281290056825" 
                   className="flex items-center gap-4 hover:text-secondary transition-colors group"
                 >
                   <div className="bg-primary p-2 rounded-xl border-2 border-black group-hover:bg-secondary transition-colors">
                     <Phone size={28} className="text-black" />
                   </div>
-                  <span className="font-bold text-lg md:text-xl">+62 XXX XXXX XXXX</span>
+                  <span className="font-bold text-lg md:text-xl">+62 812 9005 6825</span>
                 </a>
               </div>
             </div>

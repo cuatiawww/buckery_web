@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
@@ -10,20 +10,21 @@ import api from '@/services/api';
 
 const AdminDashboard = () => {
   const router = useRouter();
-  const { logout, username, userType } = useAuth();
-
-  const handleAdminLogout = async () => {
-    try {
-      // Hapus token admin dan redirect ke admin login
-      Cookies.remove('token');
-      Cookies.remove('username');
-      Cookies.remove('userType');
-      delete api.defaults.headers.common['Authorization'];
-      router.push('/admin/login');
-    } catch (error) {
-      console.error('Admin logout error:', error);
+  const { username, userType, isAuthenticated } = useAuth();
+  
+  // Tambahkan useEffect untuk pengecekan auth
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
     }
-  };
+
+    if (userType !== 'ADMIN' && userType !== 'STAFF') {
+      router.push('/');
+      return;
+    }
+  }, [isAuthenticated, userType, router]);
+
 
   const menuItems = [
     {
@@ -86,12 +87,11 @@ const AdminDashboard = () => {
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleAdminLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-              >
-                Logout
-              </button>
+            <Link href="/">
+            <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-300">
+              Kembali ke Web
+            </button>
+          </Link>
             </div>
           </div>
         </div>
@@ -128,15 +128,6 @@ const AdminDashboard = () => {
             })}
           </div>
         </div>
-      </div>
-
-      {/* Tombol Kembali ke Web */}
-      <div className="flex justify-center mt-4 mb-8">
-        <Link href="/">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-300">
-            Kembali ke Web
-          </button>
-        </Link>
       </div>
 
       {/* Footer */}
