@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, User, LogOut, Menu, X, ShoppingBag } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { authService } from '@/services/api';
+// import { authService } from '@/services/api';
 
 const Navbar = () => {
   const pathname = usePathname();
-  const router = useRouter();
+  // const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { itemCount } = useCart();
@@ -26,14 +26,10 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
-      authLogout();
       setIsDropdownOpen(false);
-      router.push('/login');
+      await authLogout(); 
     } catch (error) {
-      console.error('Logout failed:', error);
-      authLogout();
-      router.push('/login');
+      console.error('Logout error:', error);
     }
   };
 

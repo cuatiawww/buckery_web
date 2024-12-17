@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+'use client';
 
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { authService, FormDataLogin } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
@@ -13,6 +13,8 @@ const LoginPage = () => {
   const router = useRouter();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState<FormDataLogin>({
     emailUsername: '',
     password: '',
@@ -21,6 +23,7 @@ const LoginPage = () => {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
+    setError(''); // Clear error when user types
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -33,22 +36,32 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
     try {
       const response = await authService.userLogin(formData);
       if (response.token) {
-        // Use the context's login function
         login(response.token, response.username, response.user_type);
-        router.push('/'); // Redirect to home page
+        
+        // Redirect based on user type
+        if (response.user_type === 'ADMIN' || response.user_type === 'STAFF') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/');
+        }
       }
     } catch (error: any) {
       if (error.response?.data?.message) {
-        alert(error.response.data.message);
+        setError(error.response.data.message);
       } else if (error.response?.data?.errors) {
         const errorMessages = Object.values(error.response.data.errors).flat();
-        alert(errorMessages.join('\n'));
+        setError(errorMessages.join('\n'));
       } else {
-        alert('Login failed. Please check your credentials.');
+        setError('Login gagal. Silakan periksa kembali username dan password Anda.');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -73,6 +86,13 @@ const LoginPage = () => {
         <div className="max-w-md mx-auto w-full">
           <h2 className="text-3xl font-bold mb-8 text-center">LOGIN</h2>
           
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-start">
+              <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold mb-2">
@@ -86,6 +106,7 @@ const LoginPage = () => {
                 className="w-full p-3 rounded-lg bg-white border-2 border-black focus:outline-none focus:border-primary font-form"
                 required
                 placeholder="Masukkan username Anda"
+                disabled={isLoading}
               />
             </div>
 
@@ -103,11 +124,13 @@ const LoginPage = () => {
                   autoComplete="current-password"
                   required
                   placeholder="Masukkan password Anda"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-500" />
@@ -126,6 +149,7 @@ const LoginPage = () => {
                 checked={formData.rememberMe}
                 onChange={handleChange}
                 className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                disabled={isLoading}
               />
               <label htmlFor="rememberMe" className="ml-2 block text-sm font-semibold">
                 Ingat Saya
@@ -134,9 +158,10 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              className="w-full p-3 bg-tertiary text-black rounded-lg font-semibold border-4 border-black hover:bg-secondary transition-colors"
+              disabled={isLoading}
+              className="w-full p-3 bg-tertiary text-black rounded-lg font-semibold border-4 border-black hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Masuk
+              {isLoading ? 'Memproses...' : 'Masuk'}
             </button>
 
             <div className="text-center mt-4">

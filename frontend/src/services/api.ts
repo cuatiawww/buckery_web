@@ -273,10 +273,19 @@ export const authService = {
   },
 
   logout: async () => {
+    const token = Cookies.get('token');
+    if (!token) return; // Skip if no token
+
     try {
-      await api.post('/auth/logout/');
+      await api.post('/auth/logout/', null, {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
     } catch (error) {
       console.error('Logout error:', error);
+      // Re-throw untuk handling di AuthContext
+      throw error;
     }
   }
 };

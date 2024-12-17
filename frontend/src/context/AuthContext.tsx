@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api, { authService } from '@/services/api';
 import Cookies from 'js-cookie';
+import { AxiosError } from 'axios';
+import { clearCartGlobal } from './CartContext';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -20,7 +23,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+type AuthProviderProps = {
+  children: React.ReactNode;
+  onLogout?: () => void; // Callback untuk clear cart
+};
+
+export function AuthProvider({ children, onLogout }: AuthProviderProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
@@ -33,8 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       try {
         const tokenFromCookie = Cookies.get('token') || localStorage.getItem('token');
-        console.log('Checking auth with token:', tokenFromCookie);
-  
+        
         if (tokenFromCookie) {
           api.defaults.headers.common['Authorization'] = `Token ${tokenFromCookie}`;
           
@@ -42,23 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const userTypeFromStorage = Cookies.get('userType') || localStorage.getItem('userType');
             const usernameFromStorage = Cookies.get('username') || localStorage.getItem('username');
             
-            // Restore auth state
             setToken(tokenFromCookie);
             setIsAuthenticated(true);
             setUsername(usernameFromStorage);
             setUserType(userTypeFromStorage);
             
-            // Validate token dengan request
             await api.get('/user/profile/');
           } catch (error) {
-            console.error('Token validation failed:', error);
             clearAuth();
           }
         } else {
           clearAuth();
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
         clearAuth();
       } finally {
         setIsLoading(false);
@@ -68,9 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-
   const synchronizeAuth = (token: string, username: string, userType: string) => {
-    // Set cookies
     const cookieOptions: Cookies.CookieAttributes = { 
       expires: 7, 
       path: '/',
@@ -78,7 +79,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       secure: process.env.NODE_ENV === 'production'
     };
     
-    // Set cookies dan localStorage sebagai fallback
     Cookies.set('token', token, cookieOptions);
     Cookies.set('username', username, cookieOptions);
     Cookies.set('userType', userType, cookieOptions);
@@ -86,27 +86,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('username', username);
     localStorage.setItem('userType', userType);
     
-    // Set axios header
     api.defaults.headers.common['Authorization'] = `Token ${token}`;
-    
-    console.log('Auth synchronized:', {
-      token: Cookies.get('token'),
-      username: Cookies.get('username'),
-      userType: Cookies.get('userType')
-    });
   };
 
-const clearAuth = () => {
-  delete api.defaults.headers.common['Authorization'];
-  Cookies.remove('token');
-  Cookies.remove('username');
-  Cookies.remove('userType');
-  localStorage.clear();
-  setToken(null);
-  setIsAuthenticated(false);
-  setUsername(null);
-  setUserType(null);
-};
+  const clearAuth = () => {
+    delete api.defaults.headers.common['Authorization'];
+    Cookies.remove('token', { path: '/' });
+    Cookies.remove('username', { path: '/' });
+    Cookies.remove('userType', { path: '/' });
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userType');
+    setToken(null);
+    setIsAuthenticated(false);
+    setUsername(null);
+    setUserType(null);
+    clearCartGlobal();
+  };
 
   const login = (newToken: string, username: string, userType: string) => {
     synchronizeAuth(newToken, username, userType);
@@ -116,59 +112,24 @@ const clearAuth = () => {
     setUserType(userType);
   };
 
-  // const logout = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const currentToken = token || Cookies.get('token');
-      
-  //     if (currentToken) {
-  //       try {
-  //         await authService.logout();
-  //       } catch (error) {
-  //         console.error('API logout error:', error);
-  //       }
-  //     }
-      
-  //     clearAuth();
-  //     router.push('/login');
-  //   } catch (error) {
-  //     console.error('Logout error:', error);
-  //     clearAuth();
-  //     router.push('/login');
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const logout = async () => {
-    setIsLoading(true);
     try {
-      const currentToken = token || Cookies.get('token');
-      const currentUserType = userType || Cookies.get('userType');
-      
-      if (currentToken) {
-        try {
-          await authService.logout();
-        } catch (error) {
-          console.error('API logout error:', error);
-        }
-      }
-      
+      await authService.logout();
       clearAuth();
-      if (currentUserType === 'ADMIN' || currentUserType === 'STAFF') {
-        router.push('/admin/login');
-      } else {
-        router.push('/login');
+      if (onLogout) {
+        onLogout(); // Panggil callback untuk clear cart
       }
-    } catch (error) {
-      console.error('Logout error:', error);
-      clearAuth();
       router.push('/login');
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      clearAuth();
+      if (onLogout) {
+        onLogout(); // Panggil callback untuk clear cart
+      }
+      router.push('/login');
     }
   };
-    
+
   const value = {
     isAuthenticated,
     username,
@@ -196,7 +157,7 @@ const clearAuth = () => {
     </AuthContext.Provider>
   );
 }
-// debug
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
