@@ -27,17 +27,36 @@ export default function CartPage() {
 
   const CartHeader = () => (
     <div className="bg-primary pt-24 pb-16 relative">
-      <div className="container mx-auto px-4 flex justify-between items-center mb-8">
-        <Link href="/menu" className="flex items-center text-black">
-          <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
-          <span className="text-xl font-bold">KEMBALI</span>
-        </Link>
-        
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-black">KERANJANG</h1>
+      <div className="container mx-auto px-4">
+        {/* Absolute positioned back button */}
+        <div className="absolute left-4 z-10">
+          <Link href="/menu" className="flex items-center text-black">
+            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
+            <span className="text-xl font-bold hidden md:block">KEMBALI</span>
+          </Link>
         </div>
         
-        <div className="w-[144px]" />
+        {/* Centered title */}
+        <div className="flex justify-center items-center mb-8">
+          <h1 className="text-4xl font-bold text-black">KERANJANG</h1>
+        </div>
+      </div>
+  
+      <div className="absolute bottom-50 left-0 right-0">
+        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+          <path
+            fill="#000000"
+            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+          />
+        </svg>
+      </div>
+      <div className="absolute -bottom-1 left-0 right-0">
+        <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+          <path
+            fill="#F8E6C2"
+            d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+          />
+        </svg>
       </div>
 
       <WaveBorder />

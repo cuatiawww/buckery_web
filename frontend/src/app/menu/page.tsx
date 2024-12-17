@@ -102,45 +102,55 @@ const MenuPage = () => {
     return <div className="text-center py-8 text-red-500">{error}</div>;
   }
 
+const MenuHeader = () => (
+  <div className="bg-primary pt-24 pb-16 relative">
+    <div className="container mx-auto px-4">
+      {/* Navigation container with flexbox */}
+      <div className="flex justify-between items-center">
+        {/* Left back button */}
+        <Link href="/" className="flex items-center text-black">
+          <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
+          <span className="text-xl font-bold hidden md:block">KEMBALI</span>
+        </Link>
+        
+        {/* Centered title */}
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <h1 className="text-4xl font-bold text-black">MENU</h1>
+        </div>
+
+        {/* Right forward button */}
+        <Link href="/keranjang" className="flex items-center text-black">
+          <span className="text-xl font-bold hidden md:block">LANJUTKAN</span>
+          <Image src="/direct-right.svg" alt="Next" width={60} height={40} priority />
+        </Link>
+      </div>
+    </div>
+
+    {/* Wave Border */}
+    <div className="absolute bottom-50 left-0 right-0">
+      <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+        <path
+          fill="#000000"
+          d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+        />
+      </svg>
+    </div>
+    <div className="absolute -bottom-1 left-0 right-0">
+      <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
+        <path
+          fill="#F8E6C2"
+          d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
+        />
+      </svg>
+    </div>
+  </div>
+);
+
+
+
   return (
     <div className="min-h-screen">
-      {/* Header Section */}
-      <div className="bg-primary pt-24 pb-16 relative">
-        <div className="container mx-auto px-4 flex justify-between items-center mb-8">
-          <Link href="/" className="flex items-center text-black">
-            <Image src="/direct-left.svg" alt="Back" width={60} height={40} priority />
-            <span className="text-xl font-bold">KEMBALI</span>
-          </Link>
-          
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-black">MENU</h1>
-          </div>
-          
-          <Link href="/keranjang" className="flex items-center text-black">
-            <span className="text-xl font-bold">LANJUTKAN</span>
-            <Image src="/direct-right.svg" alt="Next" width={60} height={40} priority />
-          </Link>
-        </div>
-
-        {/* Wave Border */}
-        <div className="absolute bottom-50 left-0 right-0">
-          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-            <path
-              fill="#000000"
-              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-            />
-          </svg>
-        </div>
-        <div className="absolute -bottom-1 left-0 right-0">
-          <svg viewBox="0 0 1440 120" className="w-full h-16" preserveAspectRatio="none">
-            <path
-              fill="#F8E6C2"
-              d="M0,64 C480,150 960,-20 1440,64 L1440,120 L0,120 Z"
-            />
-          </svg>
-        </div>
-      </div>
-
+      <MenuHeader />
       {/* Content Section */}
       <div className="bg-primary_bg py-12">
         <div className="container mx-auto">

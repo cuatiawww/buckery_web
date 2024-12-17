@@ -101,7 +101,7 @@ class UserSerializer(serializers.ModelSerializer):
                 email=validated_data['email'],
                 password=validated_data['password'],
                 nama_lengkap=validated_data['nama_lengkap'],
-                user_type='USER'  # Default to regular user
+                user_type='USER' 
             )
             return user
         except Exception as e:
@@ -179,13 +179,13 @@ class TestimonialSerializer(serializers.ModelSerializer):
     
 # PAYMENT
 class PaymentSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(read_only=True)  # Tambahkan ini
+    user = serializers.StringRelatedField(read_only=True) 
 
     class Meta:
         model = Payment
         fields = [
             'id',
-            'user',  # Tambahkan ini
+            'user',  
             'order_number',
             'customer_name',
             'phone',
@@ -202,7 +202,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'order_number', 'created_at', 'user']
 
     def create(self, validated_data):
-        # Generate unique order number
+        # Generate num
         order_number = f"ORD{int(time.time())}"
         validated_data['order_number'] = order_number
         return super().create(validated_data)

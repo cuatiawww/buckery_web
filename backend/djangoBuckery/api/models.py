@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # CUSTOM USER
-
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
         ('ADMIN', 'Admin'),
@@ -48,16 +47,15 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile for {self.user.username}"
-    
-#CRUD DATABASE
+
 
 # KATEGORI 
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(
-        null=True,  #klo null ada defaultnya
-        blank=True,  
+        null=True,
+        blank=True,
         default="Default category description"  
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -69,7 +67,6 @@ class Category(models.Model):
         return self.name
     
 #PRODUK
-
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
@@ -78,18 +75,18 @@ class Product(models.Model):
     stock = models.IntegerField(default=0)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)  # Tambahkan default value
+    is_active = models.BooleanField(default=True) 
 
     def __str__(self):
         return self.name
     
-class HeroImage(models.Model):
-    image = models.ImageField(upload_to='hero/')
-    order = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=True)
+# class HeroImage(models.Model):
+#     image = models.ImageField(upload_to='hero/')
+#     order = models.IntegerField(default=0)
+#     is_active = models.BooleanField(default=True)
 
-    class Meta:
-        ordering = ['order']
+#     class Meta:
+#         ordering = ['order']
 
 #TENTANG KAMI
 class TimelineEvent(models.Model):
@@ -149,7 +146,7 @@ class ContactInformation(models.Model):
 class Testimonial(models.Model):
     username = models.CharField(max_length=100)
     message = models.TextField()
-    tagline = models.CharField(max_length=100)  
+    tagline = models.CharField(max_length=100)
     image = models.ImageField(upload_to='testimonials/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     order = models.IntegerField(default=0)
@@ -162,8 +159,6 @@ class Testimonial(models.Model):
         return f"Testimonial by @{self.username}"
 
 # PAYMENTMONITOR
-# models.py
-
 class Payment(models.Model):
     PAYMENT_STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -187,7 +182,7 @@ class Payment(models.Model):
     address = models.TextField()
     
     # Order Details
-    items = models.JSONField(default=dict)  # Store array of items with quantity and price
+    items = models.JSONField(default=dict) 
     total = models.DecimalField(max_digits=10, decimal_places=2)
     
     # Payment Info
@@ -207,11 +202,9 @@ class Payment(models.Model):
         default='pending'
     )
     
-    # Timestamps
+    # Timestamp
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    # Notes and Additional Info
     notes = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -231,6 +224,5 @@ class Payment(models.Model):
     @property
     def payment_proof_url(self):
         if self.payment_proof:
-            # Pastikan menggunakan MEDIA_URL yang benar dari settings
             return f"{settings.MEDIA_URL}{self.payment_proof}"
         return None
